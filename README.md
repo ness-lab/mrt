@@ -10,8 +10,3 @@ Ne can be estimated from genomic sequence data in two ways: the first relies on 
 
 To answer this, we’ll simulate genomic data in SLiM (a common population genetic simulation software) using a number of demographic scenarios (e.g., constant size, reductions in size, etc.). Because we are simulating, mutation and recombination rates will be known, allowing us to estimate Ne on the simulated data using both approaches without issue.
 
-## Resources
-
-- [Youtube playlist by Dr. Mohamed Noor](https://www.youtube.com/watch?v=UeWU1yOz8lQ&list=PL4n6Uk3aii8iottl_J2OWrn-8RVveZWri)
-- [Beginner programmign lessons](https://utm-coders.github.io/studyGroup/lessons/)
-    - [Youtube videos accompanying above lessons](https://www.youtube.com/channel/UCTTUketB568idCSUsXUug6w)
