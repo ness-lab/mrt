@@ -1,7 +1,6 @@
 ## Estimating effective population size from diversity and population-wide recombination
 
-### Catherine Burzynski BIO481 project
-#### Supervised by: James S. Santangelo, Ahmed Hasan, and Joel Levine
+#### James S. Santangelo, Ahmed Hasan, Trevor Schmahl, and Rob Ness
 
 ### Project
 
