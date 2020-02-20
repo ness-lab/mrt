@@ -41,11 +41,6 @@ def create_sfs_dict(inpath):
             # Add singletons, doubletons, ...n-tons
             for variant in my_vcf:
                 AC = variant.INFO.get('AC')
-                # print(AC)
-                # idx = line.find(';AC=', 0, 150)
-                # if(idx == -1):
-                #     continue
-                # AC = int(line[idx + 4:idx + 8].split(';')[0])
                 sfs_list[AC] += 1
 
             # Add invariant sites to sfs list
@@ -71,32 +66,37 @@ def create_sfs_dict(inpath):
 def write_thetaNe_values(sfs_dict, outpath):
 
     # Open csv to write resutls
-    outfile = open(outpath, 'w+')
+    with open(outpath, 'w+') as f:
 
-    # Write header
-    outfile.write('N,bot,gen,theta_pi,theta_w,Ne_pi,Ne_w\n')
+        # Write header
+        f.write('N,bot,gen,theta_pi,theta_w,Ne_pi,Ne_w\n')
 
-    mu = float(1e-8)
+        mu = float(1e-8)
 
-    # Interate through sfs dictionary and write to csv
-    for key in sfs_dict.keys():
+        # Interate through sfs dictionary and write to csv
+        for key in sfs_dict.keys():
 
-        # Get dict values
-        d = sfs_dict[key]
+            # Get dict values, which are encoded as <pop size>-<bottleneck>
+            size_bot = sfs_dict[key]
 
-        l = d.keys()
-        l = sorted(l)
+            # Get generations as list
+            generations = sorted(size_bot.keys())
 
-        # Iterate through nested dictionary values (generations)
-        for g in l:
-            pi = d[g].theta_pi()
-            watersons = d[g].theta_w()
-            Ne_pi = (pi / (4 * mu))
-            Ne_w = (watersons / (4 * mu))
-#             print(g, d[g].theta_pi(), d[g].theta_w(),Ne_pi,Ne_w)
-            N_and_Gen = key.split('-')
-            outfile.write('{0},{1},{2},{3},{4},{5},{6}\n'.format(N_and_Gen[0], N_and_Gen[1], g, pi,watersons, Ne_pi, Ne_w))
-    outfile.close()
+            # Iterate through nested dictionary values (generations)
+            for gen in generations:
+                pi = size_bot[gen].theta_pi()
+                watersons = size_bot[gen].theta_w()
+                Ne_pi = round((pi / (4 * mu)), 3)
+                Ne_w = round((watersons / (4 * mu)), 3)
+                pop_size = key.split('-')[0]
+                bottleneck = key.split('-')[1]
+                f.write('{0},{1},{2},{3},{4},{5},{6}\n'.format(pop_size,
+                                                               bottleneck,
+                                                               gen,
+                                                               pi,
+                                                               watersons,
+                                                               Ne_pi,
+                                                               Ne_w))
 
 
 inpath = "../../data/test_SLiM_output/"
