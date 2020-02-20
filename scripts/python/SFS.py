@@ -57,11 +57,30 @@ class SFS:
             D = None
         return D
 
-    # NOTE: THIS METHODS NEEDS TO BE CLEANED UP.
     def theta_pi(self):
+        """
+        f = bin = frequency count ie 1:singleton, 2:doubleton etc
+        n = self.allele_count() # how many samples you have
+        x = self.sfs[bin] # number of sites with count bin (e.g., # of singletons)
+        bessel_cor = n / n - 1. Correction to the biased sample variance.
+            See https://en.wikipedia.org/wiki/Bessel%27s_correction
+        p = float(bin)/self.allele_count()
+        """
+        pi_list = []
+        n = self.allele_count()
+
         if self.sites() > 0:
-            pi = sum([(self.sfs[bin] * (2.0 * self.allele_count() / (self.allele_count() - 1.0)) * (float(bin) / self.allele_count()) * (1 - (float(bin) / self.allele_count()))) for bin in range(len(self.sfs))])
-            pi = pi / self.sites()
+            # Calculate contribution of each site (e.g., singleton) to pi.
+            for f in range(len(self.sfs)):
+                x = self.sfs[f]
+                bessel_cor = (n / (n - 1.0))
+                p = (float(f) / n)
+                q = (1 - p)
+                hwe = 2.0 * p * q
+                pi_list.append(x * bessel_cor * hwe)
+
+            # Get pi by dividing by total number of sites
+            pi = sum(pi_list) / self.sites()
         else:
             pi = None
         return pi
