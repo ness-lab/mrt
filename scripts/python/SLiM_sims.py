@@ -8,13 +8,6 @@ import subprocess
 import sys
 
 
-def parse(out):
-    lines = out.split("\n")
-    for line in lines:
-        print(line)
-        print("--------------")
-
-
 def main():
 
     N = int(sys.argv[1])  # initial N value
