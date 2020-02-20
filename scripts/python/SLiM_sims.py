@@ -33,5 +33,6 @@ def main():
     parse(out)  # calls function to parse the output
     print(err)  # prints error message
 
+
 if __name__ == "__main__":
     main()
