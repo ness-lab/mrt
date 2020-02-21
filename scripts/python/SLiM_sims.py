@@ -5,9 +5,14 @@
 # simulation to easily be run on the cluster using GNU parallel.
 
 import subprocess
+import sys
+import os
 
 
 def run_slim(N, bot):
+
+    # Change directory to script path so it can be run from any directory in project
+    os.chdir(sys.path[0])
 
     # Call SLiM from command line with N and bottleneck proportion values
     # (passed as command-line arguments)
@@ -19,7 +24,7 @@ def run_slim(N, bot):
 
     # out is output of slim
     # err is error message from slim
-    print(out)  # calls function to parse the output
+    # print(out)  # calls function to parse the output
     print(err)  # prints error message
 
 
@@ -31,6 +36,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     N = args.N
     bot = args.bot
-    print(N, bot)
 
     run_slim(N, bot)
