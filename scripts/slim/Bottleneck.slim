@@ -13,7 +13,7 @@ initialize() {
 
 	// New population size following the bottleneck
 	// "N" and "bottleneck" defined in SLiM_sims.py
-	defineConstant("N_bot", N * bottleneck);
+	defineConstant("N_bot", N * bot);
 }
 
 // create a population of N individuals
@@ -35,14 +35,14 @@ s1 late() {
 			print(p1.individualCount);
 			//p1.genomes.outputVCF();
 //			print("Writing " + "./slim_" + N + "_" + sim.generation + ".vcf");
-      	p1.outputVCFSample(50, replace = F, outputMultiallelics = F, filePath="../../data/test_SLiM_output/slim_N" + N + "_" + "bot" + bottleneck + "_" + "gen" + sim.generation + ".vcf");
+      	p1.outputVCFSample(50, replace = F, outputMultiallelics = F, filePath="../../data/test_SLiM_output/slim_N" + N + "_" + "bot" + bot + "_" + "gen" + sim.generation + ".vcf");
 
       }
       if(p1.individualCount < 50){
       	print(p1.individualCount);
 			//p1.genomes.outputVCF();
 //			print("Writing " + "./slim_" + N + "_" + sim.generation + ".vcf");
-      	p1.outputVCFSample(p1.individualCount, replace = F, outputMultiallelics = F, filePath="../../data/test_SLiM_output/slim_N" + N + "_" + "bot" + bottleneck + "_" + "gen" + sim.generation + ".vcf");
+      	p1.outputVCFSample(p1.individualCount, replace = F, outputMultiallelics = F, filePath="../../data/test_SLiM_output/slim_N" + N + "_" + "bot" + bot + "_" + "gen" + sim.generation + ".vcf");
       }
 
    }
