@@ -71,8 +71,7 @@ class SFS:
 
         if self.sites() > 0:
             # Calculate contribution of each site (e.g., singleton) to pi.
-            for f in range(len(self.sfs)):
-                x = self.sfs[f]
+            for f, x in enumerate(self.sfs):
                 bessel_cor = (n / (n - 1.0))
                 p = (float(f) / n)
                 q = (1 - p)
