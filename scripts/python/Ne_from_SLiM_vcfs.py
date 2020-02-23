@@ -30,9 +30,9 @@ def create_sfs_dict(inpath):
 
             # Split VCF filename and split to extract population size, bottleneck and generation
             split_filename = filename.split('_')
-            N_sims = int(split_filename[1].split('N')[1])
-            bot = float(split_filename[2].split('bot')[1])
-            gen = int(split_filename[3].split('gen')[1].split('.')[0])
+            N_sims = int(split_filename[0].split('N')[1])
+            bot = float(split_filename[1].split('bot')[1])
+            gen = int(split_filename[2].split('gen')[1].split('.')[0])
             # print(N_sims, bot, gen)
             N_samples = len(my_vcf.samples)
 
@@ -101,7 +101,7 @@ def write_thetaNe_values(sfs_dict, outpath):
                 writer.writerow(row)
 
 
-inpath = "../../data/test_SLiM_output/"
+inpath = "../../data/test/"
 sfs_dict = create_sfs_dict(inpath = inpath)
 
 outpath = '../../data/clean/theta_NeValues.csv'
