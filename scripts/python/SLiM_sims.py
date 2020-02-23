@@ -9,14 +9,25 @@ import sys
 import os
 
 
-def run_slim(N, bot):
+def create_output_directory(outpath):
+
+    if os.path.isdir(outpath):
+        print("OUTPATH EXISTS, RUNNING SLiM SIMULATIONS")
+    else:
+        print("CREATING OUTPUT DIRECTORY")
+        os.mkdir(outpath)
+        print("RUNNING SLiM SIMULATIONS")
+
+
+def run_slim(N, bot, outpath, slim_path):
 
     # Change directory to script path so it can be run from any directory in project
     os.chdir(sys.path[0])
 
     # Call SLiM from command line with N and bottleneck proportion values
     # (passed as command-line arguments)
-    process = subprocess.Popen(["slim", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "../slim/Bottleneck.slim"],
+    outpath = "'" + outpath + "'"  # Required for command-line parsing and passing to SLiM
+    process = subprocess.Popen(["slim", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "-d", "outpath=" + str(outpath), slim_path],
                                stdout = subprocess.PIPE,
                                stderr = subprocess.PIPE,
                                universal_newlines = True)
@@ -33,8 +44,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("N", help = "The desired population size", type = int)
     parser.add_argument("bot", help = "The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0 = No bottleneck", type = float)
+    parser.add_argument("slim_path", help = "Path to SLiM script", type = str)
+    parser.add_argument("outpath", help = "Path to which VCFs from SLiM should be written", type = str)
     args = parser.parse_args()
+
+    # Retrieve command-line arguments
     N = args.N
     bot = args.bot
+    slim_path = args.slim_path
+    outpath = args.outpath
 
-    run_slim(N, bot)
+    # Create output directory, if it doesn't exit
+    create_output_directory(outpath)
+
+    # Run simulations
+    run_slim(N, bot, outpath, slim_path)
