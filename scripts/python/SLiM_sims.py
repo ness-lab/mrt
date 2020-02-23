@@ -15,9 +15,9 @@ def run_slim(N, bot, outpath, slim_path):
     # (passed as command-line arguments)
     outpath = "'" + outpath + "'"  # Required for command-line parsing and passing to SLiM
     process = subprocess.Popen(["slim", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "-d", "outpath=" + str(outpath), slim_path],
-                               stdout = subprocess.PIPE,
-                               stderr = subprocess.PIPE,
-                               universal_newlines = True)
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               universal_newlines=True)
     out, err = process.communicate()
 
     # out is output of slim
@@ -28,10 +28,10 @@ def run_slim(N, bot, outpath, slim_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("N", help = "The desired population size", type = int)
-    parser.add_argument("bot", help = "The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0 = No bottleneck", type = float)
-    parser.add_argument("slim_path", help = "Path to SLiM script.", type = str)
-    parser.add_argument("outpath", help = "Path to which VCFs from SLiM should be written", type = str)
+    parser.add_argument("N", help="The desired population size", type=int)
+    parser.add_argument("bot", help="The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0=No bottleneck", type=float)
+    parser.add_argument("slim_path", help="Path to SLiM script.", type=str)
+    parser.add_argument("outpath", help="Path to which VCFs from SLiM should be written", type=str)
     args = parser.parse_args()
 
     # Retrieve command-line arguments
