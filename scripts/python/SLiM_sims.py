@@ -21,9 +21,6 @@ def create_output_directory(outpath):
 
 def run_slim(N, bot, outpath, slim_path):
 
-    # Change directory to script path so it can be run from any directory in project
-    os.chdir(sys.path[0])
-
     # Call SLiM from command line with N and bottleneck proportion values
     # (passed as command-line arguments)
     outpath = "'" + outpath + "'"  # Required for command-line parsing and passing to SLiM
@@ -53,6 +50,9 @@ if __name__ == "__main__":
     bot = args.bot
     slim_path = args.slim_path
     outpath = args.outpath
+
+    # Change directory to script path so it can be run from any directory in project
+    os.chdir(sys.path[0])
 
     # Create output directory, if it doesn't exit
     create_output_directory(outpath)
