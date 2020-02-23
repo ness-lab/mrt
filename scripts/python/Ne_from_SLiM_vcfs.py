@@ -8,6 +8,7 @@ from cyvcf2 import VCF
 import os
 import tqdm
 import SFS as SFS
+import csv
 
 
 def create_sfs_dict(inpath):
@@ -68,8 +69,12 @@ def write_thetaNe_values(sfs_dict, outpath):
     # Open csv to write resutls
     with open(outpath, 'w+') as f:
 
+        # Instantiate CSV writer
+        writer = csv.writer(f)
+
         # Write header
-        f.write('N,bot,gen,theta_pi,theta_w,Ne_pi,Ne_w\n')
+        header = ['N', 'bot', 'gen', 'theta_pi', 'theta_w', 'Ne_pi', 'Ne_w', '\n']
+        writer.writerow(header)
 
         mu = float(1e-8)
 
@@ -90,13 +95,10 @@ def write_thetaNe_values(sfs_dict, outpath):
                 Ne_w = round((wattersons / (4 * mu)), 3)
                 pop_size = key.split('-')[0]
                 bottleneck = key.split('-')[1]
-                f.write('{0},{1},{2},{3},{4},{5},{6}\n'.format(pop_size,
-                                                               bottleneck,
-                                                               gen,
-                                                               pi,
-                                                               wattersons,
-                                                               Ne_pi,
-                                                               Ne_w))
+
+                # Write generation's summary stats as row
+                row = [pop_size, bottleneck, gen, pi, wattersons, Ne_pi, Ne_w, '\n']
+                writer.writerow(row)
 
 
 inpath = "../../data/test_SLiM_output/"
