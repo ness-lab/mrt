@@ -2,7 +2,7 @@
 
 # Script takes a directory filled with VCFs exported from SLiM and
 # for each one, uses the site-frequency spectrum to calculate Ne
-# from both Waterson and Pi. Exports results as single CSV.
+# from both Watterson and Pi. Exports results as single CSV.
 
 from cyvcf2 import VCF
 import os
@@ -85,16 +85,16 @@ def write_thetaNe_values(sfs_dict, outpath):
             # Iterate through nested dictionary values (generations)
             for gen in generations:
                 pi = size_bot[gen].theta_pi()
-                watersons = size_bot[gen].theta_w()
+                wattersons = size_bot[gen].theta_w()
                 Ne_pi = round((pi / (4 * mu)), 3)
-                Ne_w = round((watersons / (4 * mu)), 3)
+                Ne_w = round((wattersons / (4 * mu)), 3)
                 pop_size = key.split('-')[0]
                 bottleneck = key.split('-')[1]
                 f.write('{0},{1},{2},{3},{4},{5},{6}\n'.format(pop_size,
                                                                bottleneck,
                                                                gen,
                                                                pi,
-                                                               watersons,
+                                                               wattersons,
                                                                Ne_pi,
                                                                Ne_w))
 
