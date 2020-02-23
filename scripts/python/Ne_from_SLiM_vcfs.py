@@ -6,10 +6,12 @@
 
 from cyvcf2 import VCF
 import os
+import sys
 import tqdm
 import SFS as SFS
 import csv
-
+import argparse
+from create_output_directory import create_output_directory
 
 def create_sfs_dict(inpath):
 
@@ -67,7 +69,8 @@ def create_sfs_dict(inpath):
 def write_thetaNe_values(sfs_dict, outpath):
 
     # Open csv to write resutls
-    with open(outpath, 'w+') as f:
+    filtepath = outpath + 'theta_NeValues.csv'
+    with open(filtepath, 'w+') as f:
 
         # Instantiate CSV writer
         writer = csv.writer(f)
@@ -101,9 +104,21 @@ def write_thetaNe_values(sfs_dict, outpath):
                 writer.writerow(row)
 
 
-inpath = "../../data/test/"
-sfs_dict = create_sfs_dict(inpath = inpath)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("inpath", help = "Path to directory with VCFs", type = str)
+    parser.add_argument("outpath", help = "Path to which CSV with summary stats should be written", type = str)
+    args = parser.parse_args()
 
-outpath = '../../data/clean/theta_NeValues.csv'
-write_thetaNe_values(sfs_dict = sfs_dict, outpath = outpath)
+    # Retrieve command-line arguments
+    inpath = args.inpath
+    outpath = args.outpath
 
+    # Create output directory, if it doesn't exit
+    create_output_directory(outpath)
+
+    # Create SFS dict
+    sfs_dict = create_sfs_dict(inpath = inpath)
+
+    # Create summary CSV
+    write_thetaNe_values(sfs_dict = sfs_dict, outpath = outpath)

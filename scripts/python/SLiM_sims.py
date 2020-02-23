@@ -7,16 +7,7 @@
 import subprocess
 import sys
 import os
-
-
-def create_output_directory(outpath):
-
-    if os.path.isdir(outpath):
-        print("OUTPATH EXISTS, RUNNING SLiM SIMULATIONS")
-    else:
-        print("CREATING OUTPUT DIRECTORY")
-        os.mkdir(outpath)
-        print("RUNNING SLiM SIMULATIONS")
+from create_output_directory import create_output_directory
 
 
 def run_slim(N, bot, outpath, slim_path):
@@ -41,7 +32,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("N", help = "The desired population size", type = int)
     parser.add_argument("bot", help = "The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0 = No bottleneck", type = float)
-    parser.add_argument("slim_path", help = "Path to SLiM script", type = str)
+    parser.add_argument("slim_path", help = "Path to SLiM script.", type = str)
     parser.add_argument("outpath", help = "Path to which VCFs from SLiM should be written", type = str)
     args = parser.parse_args()
 
@@ -50,9 +41,6 @@ if __name__ == "__main__":
     bot = args.bot
     slim_path = args.slim_path
     outpath = args.outpath
-
-    # Change directory to script path so it can be run from any directory in project
-    os.chdir(sys.path[0])
 
     # Create output directory, if it doesn't exit
     create_output_directory(outpath)
