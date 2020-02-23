@@ -5,8 +5,7 @@
 # simulation to easily be run on the cluster using GNU parallel.
 
 import subprocess
-import sys
-import os
+import argparse
 from create_output_directory import create_output_directory
 
 
@@ -28,7 +27,6 @@ def run_slim(N, bot, outpath, slim_path):
 
 
 if __name__ == "__main__":
-    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("N", help = "The desired population size", type = int)
     parser.add_argument("bot", help = "The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0 = No bottleneck", type = float)
