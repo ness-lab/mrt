@@ -6,12 +6,12 @@
 
 from cyvcf2 import VCF
 import os
-import sys
 import tqdm
 import SFS as SFS
 import csv
 import argparse
 from create_output_directory import create_output_directory
+
 
 def create_sfs_dict(inpath):
 
