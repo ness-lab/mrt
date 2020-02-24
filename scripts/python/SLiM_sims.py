@@ -6,6 +6,8 @@
 
 import subprocess
 import argparse
+import os
+import tqdm
 from create_output_directory import create_output_directory
 
 
@@ -24,6 +26,29 @@ def run_slim(N, bot, outpath, slim_path):
     # err is error message from slim
     # print(out)  # calls function to parse the output
     print(err)  # prints error message
+
+
+def bgzip(outpath):
+
+    # Get files from inpath
+    files = os.listdir(outpath)
+
+    # Iterate over vcfs
+    for filename in tqdm.tqdm(files):
+
+        if filename.endswith(".vcf"):
+
+            # Full path to file
+            filepath = outpath + filename
+
+            # bgzip vcfs
+            process = subprocess.Popen(['bgzip', '-f', str(filepath)],
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE,
+                                       universal_newlines=True)
+    out, err = process.communicate()
+
+    print(err)
 
 
 if __name__ == "__main__":
@@ -45,3 +70,6 @@ if __name__ == "__main__":
 
     # Run simulations
     run_slim(N, bot, outpath, slim_path)
+
+    # bgzip files
+    bgzip(outpath)
