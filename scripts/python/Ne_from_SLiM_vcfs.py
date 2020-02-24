@@ -24,7 +24,7 @@ def create_sfs_dict(inpath):
     for filename in tqdm.tqdm(files):
         # print(filename)
 
-        if filename.endswith(".vcf"):
+        if filename.endswith(".vcf.gz"):
             # print(filename)
 
             # Load in VCF file
