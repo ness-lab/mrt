@@ -2,12 +2,15 @@
 
 # Script takes a directory filled with VCFs exported from SLiM and
 # for each one, uses the site-frequency spectrum to calculate Ne
-# from both Waterson and Pi. Exports results as single CSV.
+# from both Watterson and Pi. Exports results as single CSV.
 
 from cyvcf2 import VCF
 import os
 import tqdm
 import SFS as SFS
+import csv
+import argparse
+from create_output_directory import create_output_directory
 
 
 def create_sfs_dict(inpath):
@@ -29,9 +32,9 @@ def create_sfs_dict(inpath):
 
             # Split VCF filename and split to extract population size, bottleneck and generation
             split_filename = filename.split('_')
-            N_sims = int(split_filename[1].split('N')[1])
-            bot = float(split_filename[2].split('bot')[1])
-            gen = int(split_filename[3].split('gen')[1].split('.')[0])
+            N_sims = int(split_filename[0].split('N')[1])
+            bot = float(split_filename[1].split('bot')[1])
+            gen = int(split_filename[2].split('gen')[1].split('.')[0])
             # print(N_sims, bot, gen)
             N_samples = len(my_vcf.samples)
 
@@ -41,11 +44,6 @@ def create_sfs_dict(inpath):
             # Add singletons, doubletons, ...n-tons
             for variant in my_vcf:
                 AC = variant.INFO.get('AC')
-                # print(AC)
-                # idx = line.find(';AC=', 0, 150)
-                # if(idx == -1):
-                #     continue
-                # AC = int(line[idx + 4:idx + 8].split(';')[0])
                 sfs_list[AC] += 1
 
             # Add invariant sites to sfs list
@@ -71,37 +69,56 @@ def create_sfs_dict(inpath):
 def write_thetaNe_values(sfs_dict, outpath):
 
     # Open csv to write resutls
-    outfile = open(outpath, 'w+')
+    filtepath = outpath + 'theta_NeValues.csv'
+    with open(filtepath, 'w+') as f:
 
-    # Write header
-    outfile.write('N,bot,gen,theta_pi,theta_w,Ne_pi,Ne_w\n')
+        # Instantiate CSV writer
+        writer = csv.writer(f)
 
-    mu = float(1e-8)
+        # Write header
+        header = ['N', 'bot', 'gen', 'theta_pi', 'theta_w', 'Ne_pi', 'Ne_w', '\n']
+        writer.writerow(header)
 
-    # Interate through sfs dictionary and write to csv
-    for key in sfs_dict.keys():
+        mu = float(1e-8)
 
-        # Get dict values
-        d = sfs_dict[key]
+        # Interate through sfs dictionary and write to csv
+        for key in sfs_dict.keys():
 
-        l = d.keys()
-        l = sorted(l)
+            # Get dict values, which are encoded as <pop size>-<bottleneck>
+            size_bot = sfs_dict[key]
 
-        # Iterate through nested dictionary values (generations)
-        for g in l:
-            pi = d[g].theta_pi()
-            watersons = d[g].theta_w()
-            Ne_pi = (pi / (4 * mu))
-            Ne_w = (watersons / (4 * mu))
-#             print(g, d[g].theta_pi(), d[g].theta_w(),Ne_pi,Ne_w)
-            N_and_Gen = key.split('-')
-            outfile.write('{0},{1},{2},{3},{4},{5},{6}\n'.format(N_and_Gen[0], N_and_Gen[1], g, pi,watersons, Ne_pi, Ne_w))
-    outfile.close()
+            # Get generations as list
+            generations = sorted(size_bot.keys())
+
+            # Iterate through nested dictionary values (generations)
+            for gen in generations:
+                pi = size_bot[gen].theta_pi()
+                wattersons = size_bot[gen].theta_w()
+                Ne_pi = round((pi / (4 * mu)), 3)
+                Ne_w = round((wattersons / (4 * mu)), 3)
+                pop_size = key.split('-')[0]
+                bottleneck = key.split('-')[1]
+
+                # Write generation's summary stats as row
+                row = [pop_size, bottleneck, gen, pi, wattersons, Ne_pi, Ne_w, '\n']
+                writer.writerow(row)
 
 
-inpath = "../../data/test_SLiM_output/"
-sfs_dict = create_sfs_dict(inpath = inpath)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("inpath", help="Path to directory with VCFs", type=str)
+    parser.add_argument("outpath", help="Path to which CSV with summary stats should be written", type=str)
+    args = parser.parse_args()
 
-outpath = '../../data/clean/theta_NeValues.csv'
-write_thetaNe_values(sfs_dict = sfs_dict, outpath = outpath)
+    # Retrieve command-line arguments
+    inpath = args.inpath
+    outpath = args.outpath
 
+    # Create output directory, if it doesn't exit
+    create_output_directory(outpath)
+
+    # Create SFS dict
+    sfs_dict = create_sfs_dict(inpath=inpath)
+
+    # Create summary CSV
+    write_thetaNe_values(sfs_dict=sfs_dict, outpath=outpath)
