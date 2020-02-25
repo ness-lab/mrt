@@ -6,8 +6,6 @@
 
 import subprocess
 import argparse
-import os
-import tqdm
 from create_output_directory import create_output_directory
 
 
