@@ -5,7 +5,6 @@
 # from both Watterson and Pi. Exports results as single CSV.
 
 from cyvcf2 import VCF
-import os
 import tqdm
 import SFS as SFS
 import csv
