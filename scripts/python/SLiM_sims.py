@@ -30,24 +30,15 @@ def run_slim(N, bot, outpath, slim_path):
 
 def bgzip(outpath):
 
-    # Get files from inpath
-    files = os.listdir(outpath)
+    process = subprocess.Popen('ls {0} | xargs -n1 bgzip'.format(str(outpath) + '*.vcf'),
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               universal_newlines=True,
+                               shell=True)
 
-    # Iterate over vcfs
-    for filename in tqdm.tqdm(files):
-
-        if filename.endswith(".vcf"):
-
-            # Full path to file
-            filepath = outpath + filename
-
-            # bgzip vcfs
-            process = subprocess.Popen(['bgzip', '-f', str(filepath)],
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE,
-                                       universal_newlines=True)
     out, err = process.communicate()
 
+    # print(out)
     print(err)
 
 
