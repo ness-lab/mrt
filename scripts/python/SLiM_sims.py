@@ -14,7 +14,7 @@ def run_slim(N, bot, outpath, slim_path):
     # Call SLiM from command line with N and bottleneck proportion values
     # (passed as command-line arguments)
     outpath = "'" + outpath + "'"  # Required for command-line parsing and passing to SLiM
-    process = subprocess.Popen(["slim", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "-d", "outpath=" + str(outpath), slim_path],
+    process = subprocess.Popen(["slim", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "-d", "outpath=" + outpath, slim_path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                universal_newlines=True)
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     N = args.N
     bot = args.bot
     slim_path = args.slim_path
-    outpath = args.outpath
+    outpath = str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
 
     # Create output directory, if it doesn't exit
     create_output_directory(outpath)
