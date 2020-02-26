@@ -28,13 +28,19 @@ def run_slim(N, bot, outpath, slim_path):
 
 def bgzip(outpath):
 
-    process = subprocess.Popen('ls {0} | xargs -n1 bgzip'.format(str(outpath) + '*.vcf'),
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE,
-                               universal_newlines=True,
-                               shell=True)
+    # Find all VCFs in outpath
+    process_find = subprocess.Popen(['find', outpath, '-name', '*.vcf'],
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    universal_newlines=True)
 
-    out, err = process.communicate()
+    # bgzip all found VCFs
+    process_bgzip = subprocess.Popen(['xargs', '-n1', 'bgzip', '-f'],
+                                     stdin=process_find.stdout,
+                                     stderr=subprocess.PIPE,
+                                     universal_newlines=True)
+
+    out, err = process_bgzip.communicate()
 
     # print(out)
     print(err)
