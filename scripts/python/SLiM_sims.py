@@ -6,6 +6,7 @@
 
 import subprocess
 import argparse
+
 from create_output_directory import create_output_directory
 
 
@@ -14,7 +15,7 @@ def run_slim(N, bot, outpath, slim_path):
     # Call SLiM from command line with N and bottleneck proportion values
     # (passed as command-line arguments)
     outpath = "'" + outpath + "'"  # Required for command-line parsing and passing to SLiM
-    process = subprocess.Popen(["slim", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "-d", "outpath=" + outpath, slim_path],
+    process = subprocess.Popen(["slim", "-s", "42", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "-d", "outpath=" + str(outpath), slim_path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                universal_newlines=True)
