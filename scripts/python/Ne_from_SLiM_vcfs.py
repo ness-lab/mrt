@@ -7,7 +7,7 @@
 import csv
 import argparse
 
-import glob
+from glob import glob
 from cyvcf2 import VCF
 from tqdm import tqdm
 
@@ -21,7 +21,7 @@ def create_sfs_dict(inpath):
     sfs_dict = {}
 
     # Get files from inpath
-    files = glob.glob(inpath + "**/*.vcf.gz", recursive=True)
+    files = glob(inpath + "**/*.vcf.gz", recursive=True)
 
     for filename in tqdm(files):
         # print(filename)
