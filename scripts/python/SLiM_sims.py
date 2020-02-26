@@ -6,6 +6,7 @@
 
 import subprocess
 import argparse
+
 from create_output_directory import create_output_directory
 
 
@@ -26,6 +27,26 @@ def run_slim(N, bot, outpath, slim_path):
     print(err)  # prints error message
 
 
+def bgzip(outpath):
+
+    # Find all VCFs in outpath
+    process_find = subprocess.Popen(['find', outpath, '-name', '*.vcf'],
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    universal_newlines=True)
+
+    # bgzip all found VCFs
+    process_bgzip = subprocess.Popen(['xargs', '-n1', 'bgzip', '-f'],
+                                     stdin=process_find.stdout,
+                                     stderr=subprocess.PIPE,
+                                     universal_newlines=True)
+
+    out, err = process_bgzip.communicate()
+
+    # print(out)
+    print(err)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("N", help="The desired population size", type=int)
@@ -38,10 +59,13 @@ if __name__ == "__main__":
     N = args.N
     bot = args.bot
     slim_path = args.slim_path
-    outpath = args.outpath
+    outpath = str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
 
     # Create output directory, if it doesn't exit
     create_output_directory(outpath)
 
     # Run simulations
     run_slim(N, bot, outpath, slim_path)
+
+    # bgzip files
+    bgzip(outpath)

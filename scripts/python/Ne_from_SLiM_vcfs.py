@@ -4,12 +4,14 @@
 # for each one, uses the site-frequency spectrum to calculate Ne
 # from both Watterson and Pi. Exports results as single CSV.
 
-from cyvcf2 import VCF
-import os
-import tqdm
-import SFS as SFS
 import csv
 import argparse
+
+import glob
+from cyvcf2 import VCF
+from tqdm import tqdm
+
+import SFS as SFS
 from create_output_directory import create_output_directory
 
 
@@ -19,51 +21,48 @@ def create_sfs_dict(inpath):
     sfs_dict = {}
 
     # Get files from inpath
-    files = os.listdir(inpath)
+    files = glob.glob(inpath + "**/*.vcf.gz", recursive=True)
 
-    for filename in tqdm.tqdm(files):
+    for filename in tqdm(files):
         # print(filename)
 
-        if filename.endswith(".vcf"):
-            # print(filename)
+        # Load in VCF file
+        my_vcf = VCF(filename)
 
-            # Load in VCF file
-            my_vcf = VCF(inpath + '/' + filename)
+    #     # Split VCF filename and split to extract population size, bottleneck and generation
+        split_filename = filename.split('/')[-1].split('_')
+        N_sims = int(split_filename[0].split('N')[1])
+        bot = float(split_filename[1].split('bot')[1])
+        gen = int(split_filename[2].split('gen')[1].split('.')[0])
+        # print(N_sims, bot, gen)
+        N_samples = len(my_vcf.samples)
 
-            # Split VCF filename and split to extract population size, bottleneck and generation
-            split_filename = filename.split('_')
-            N_sims = int(split_filename[0].split('N')[1])
-            bot = float(split_filename[1].split('bot')[1])
-            gen = int(split_filename[2].split('gen')[1].split('.')[0])
-            # print(N_sims, bot, gen)
-            N_samples = len(my_vcf.samples)
+        # Initialize list for sfs
+        sfs_list = [0] * ((2 * N_samples) + 1)
 
-            # Initialize list for sfs
-            sfs_list = [0] * ((2 * N_samples) + 1)
+        # Add singletons, doubletons, ...n-tons
+        for variant in my_vcf:
+            AC = variant.INFO.get('AC')
+            sfs_list[AC] += 1
 
-            # Add singletons, doubletons, ...n-tons
-            for variant in my_vcf:
-                AC = variant.INFO.get('AC')
-                sfs_list[AC] += 1
+        # Add invariant sites to sfs list
+        ch_length = 1e8
+        sfs_list[0] = int(ch_length - sum(sfs_list))
+        # print(sfs_list)
 
-            # Add invariant sites to sfs list
-            ch_length = 1e8
-            sfs_list[0] = int(ch_length - sum(sfs_list))
-            # print(sfs_list)
+        # Use sfs list to instantiate SFS class (Rob's code)
+        sfs = SFS.SFS(sfs_list)
 
-            # Use sfs list to instantiate SFS class (Rob's code)
-            sfs = SFS.SFS(sfs_list)
+        # Create string for dictionary key
+        l1 = str(N_sims) + '-' + str(bot)
 
-            # Create string for dictionary key
-            l1 = str(N_sims) + '-' + str(bot)
+        # Add SFS class instances to appropriate dictionary keys.
+        if l1 in sfs_dict:
+            sfs_dict[l1][gen] = sfs
+        else:
+            sfs_dict[l1] = {gen: sfs}
 
-            # Add SFS class instances to appropriate dictionary keys.
-            if l1 in sfs_dict:
-                sfs_dict[l1][gen] = sfs
-            else:
-                sfs_dict[l1] = {gen: sfs}
-
-    return(sfs_dict)
+    return sfs_dict
 
 
 def write_thetaNe_values(sfs_dict, outpath):
