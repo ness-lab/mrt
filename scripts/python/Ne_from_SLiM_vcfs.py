@@ -22,7 +22,7 @@ def create_sfs_dict(inpath):
     files = glob.glob(inpath + "**/*.vcf.gz", recursive=True)
 
     for filename in tqdm.tqdm(files):
-        print(filename)
+        # print(filename)
 
         # Load in VCF file
         my_vcf = VCF(filename)
