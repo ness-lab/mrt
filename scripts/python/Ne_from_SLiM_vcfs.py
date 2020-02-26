@@ -62,7 +62,7 @@ def create_sfs_dict(inpath):
         else:
             sfs_dict[l1] = {gen: sfs}
 
-    return(sfs_dict)
+    return sfs_dict
 
 
 def write_thetaNe_values(sfs_dict, outpath):
