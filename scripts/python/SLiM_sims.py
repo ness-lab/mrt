@@ -6,6 +6,9 @@
 
 import subprocess
 import argparse
+import os
+
+from glob import glob
 
 from create_output_directory import create_output_directory
 
@@ -76,6 +79,29 @@ def bgzip_vcfs(outpath):
     print(err)
 
 
+def convert_to_ldhat(outpath):
+
+    # Path where LDhat input files will be stored
+    ldhat_file_path = outpath + "ldhad_input_files/"
+
+    # Create directory if it doesn't exist
+    create_output_directory(ldhat_file_path)
+
+    for vcf in glob(outpath + "*.vcf.gz"):
+
+        filename = vcf.split('/')[-1].split('.vcf.gz')[0]
+        # print(filename)
+
+        process_vcftools = subprocess.Popen(['vcftools', '--gzvcf', vcf,
+                                             '--chr', '1', '--ldhat',
+                                             '--out', ldhat_file_path + filename],
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE,
+                                            universal_newlines=True)
+
+        out, err = process_vcftools.communicate()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("N", help="The desired population size", type=int)
@@ -90,7 +116,7 @@ if __name__ == "__main__":
     slim_path = args.slim_path
     outpath = str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
 
-    # Create output directory, if it doesn't exit
+    # Create output directory for VCFs, if it doesn't exit
     create_output_directory(outpath)
 
     # Run simulations
@@ -101,3 +127,6 @@ if __name__ == "__main__":
 
     # bgzip files
     bgzip_vcfs(outpath)
+
+    # Create LDhat '.sites' and '.locs' files
+    convert_to_ldhat(outpath)
