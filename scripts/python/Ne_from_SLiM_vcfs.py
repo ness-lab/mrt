@@ -4,12 +4,14 @@
 # for each one, uses the site-frequency spectrum to calculate Ne
 # from both Watterson and Pi. Exports results as single CSV.
 
-from cyvcf2 import VCF
-import tqdm
-import SFS as SFS
 import csv
 import argparse
+
 import glob
+from cyvcf2 import VCF
+from tqdm import tqdm
+
+import SFS as SFS
 from create_output_directory import create_output_directory
 
 
@@ -21,7 +23,7 @@ def create_sfs_dict(inpath):
     # Get files from inpath
     files = glob.glob(inpath + "**/*.vcf.gz", recursive=True)
 
-    for filename in tqdm.tqdm(files):
+    for filename in tqdm(files):
         # print(filename)
 
         # Load in VCF file
