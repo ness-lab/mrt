@@ -59,7 +59,7 @@ def sort_vcfs(outpath):
     print(err)
 
 
-def bgzip(outpath):
+def bgzip_vcfs(outpath):
 
     # Use find utility to identify all VCFs in outpath
     process_find = find_vcfs(outpath)
@@ -100,4 +100,4 @@ if __name__ == "__main__":
     sort_vcfs(outpath)
 
     # bgzip files
-    bgzip(outpath)
+    bgzip_vcfs(outpath)
