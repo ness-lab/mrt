@@ -6,7 +6,6 @@
 
 import subprocess
 import argparse
-import os
 
 from glob import glob
 
