@@ -26,13 +26,42 @@ def run_slim(N, bot, outpath, slim_path):
     print(err)  # prints error message
 
 
-def bgzip(outpath):
+def find_vcfs(outpath):
 
-    # Find all VCFs in outpath
-    process_find = subprocess.Popen(['find', outpath, '-name', '*.vcf'],
+    # Use find utility to identify all VCFs in outpath
+    process_find = subprocess.Popen(['find', outpath, '-type', 'f',
+                                     '-name', '*.vcf'],
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,
                                     universal_newlines=True)
+
+    return(process_find)
+
+
+def sort_vcfs(outpath):
+
+    # Use find utility to identify all VCFs in outpath
+    process_find = find_vcfs(outpath)
+
+    # Files from 'find' are piped to 'xargs', which uses 'sort' to sort by position
+    process_sort = subprocess.Popen(['xargs', '-I%', '-n1',
+                                     'sort', '-n', '-k2',
+                                     '%', '-o', '%'],
+                                    stdin=process_find.stdout,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    universal_newlines=True)
+
+    out, err = process_sort.communicate()
+
+    # print(out)
+    print(err)
+
+
+def bgzip(outpath):
+
+    # Use find utility to identify all VCFs in outpath
+    process_find = find_vcfs(outpath)
 
     # bgzip all found VCFs
     process_bgzip = subprocess.Popen(['xargs', '-n1', 'bgzip', '-f'],
@@ -65,6 +94,9 @@ if __name__ == "__main__":
 
     # Run simulations
     run_slim(N, bot, outpath, slim_path)
+
+    # Sort VCFs
+    sort_vcfs(outpath)
 
     # bgzip files
     bgzip(outpath)
