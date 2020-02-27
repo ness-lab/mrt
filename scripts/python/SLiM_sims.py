@@ -27,11 +27,11 @@ def run_slim(N, bot, outpath, slim_path):
     print(err)  # prints error message
 
 
-def find_vcfs(outpath):
+def find_vcfs(outpath, ext):
 
     # Use find utility to identify all VCFs in outpath
     process_find = subprocess.Popen(['find', outpath, '-type', 'f',
-                                     '-name', '*.vcf'],
+                                     '-name', '*.' + ext],
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,
                                     universal_newlines=True)
@@ -42,7 +42,7 @@ def find_vcfs(outpath):
 def sort_vcfs(outpath):
 
     # Use find utility to identify all VCFs in outpath
-    process_find = find_vcfs(outpath)
+    process_find = find_vcfs(outpath, 'vcf')
 
     # Files from 'find' are piped to 'xargs', which uses 'sort' to sort by position
     process_sort = subprocess.Popen(['xargs', '-I%', '-n1',
@@ -62,7 +62,7 @@ def sort_vcfs(outpath):
 def bgzip_vcfs(outpath):
 
     # Use find utility to identify all VCFs in outpath
-    process_find = find_vcfs(outpath)
+    process_find = find_vcfs(outpath, 'vcf')
 
     # bgzip all found VCFs
     process_bgzip = subprocess.Popen(['xargs', '-n1', 'bgzip', '-f'],
@@ -71,6 +71,23 @@ def bgzip_vcfs(outpath):
                                      universal_newlines=True)
 
     out, err = process_bgzip.communicate()
+
+    # print(out)
+    print(err)
+
+
+def tabix_vcfs(outpath):
+
+    # Use find utility to identify all VCFs in outpath
+    process_find = find_vcfs(outpath, 'vcf.gz')
+
+    # bgzip all found VCFs
+    process_tabix = subprocess.Popen(['xargs', '-n1', 'tabix', '-f'],
+                                     stdin=process_find.stdout,
+                                     stderr=subprocess.PIPE,
+                                     universal_newlines=True)
+
+    out, err = process_tabix.communicate()
 
     # print(out)
     print(err)
@@ -101,3 +118,6 @@ if __name__ == "__main__":
 
     # bgzip files
     bgzip_vcfs(outpath)
+
+    # Tabix index VCFs
+    tabix_vcfs(outpath)
