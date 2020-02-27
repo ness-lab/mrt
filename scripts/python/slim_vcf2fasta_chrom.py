@@ -5,13 +5,11 @@ matrix to determine the alternate base at each variant site
 '''
 
 import argparse
-import random
 import itertools
 import ant
 
 from tqdm import tqdm
 from cyvcf2 import VCF
-# from Bio import SeqIO
 import numpy as np
 
 
@@ -28,15 +26,13 @@ def args():
                         type=str, help='samtools format region (1 index)')
     parser.add_argument('-m', '--mut_mat', required=True,
                         type=str, help='LDhelmet mut mat file')
-    parser.add_argument('-d', '--downsample', required=False,
-                        type=float, help='Percent of SNPs to downsample to')
     parser.add_argument('-o', '--outfile', required=True,
                         type=str, help='File to write to')
 
     args = parser.parse_args()
 
     return args.vcf, args.table, args.region, \
-        args.mut_mat, args.downsample, args.outfile
+        args.mut_mat, args.outfile
 
 
 def prep_samples(vcf, table, region):
@@ -103,24 +99,13 @@ def get_alt_allele(ref_base, mut_dict):
     return alt_allele
 
 
-def write_fasta(vcf, table, region, mut_mat, downsample, outfile):
+def write_fasta(vcf, table, region, mut_mat, outfile):
     with open(outfile, 'w') as f:
         vcf_in = VCF(vcf)
         mut_dict = parse_mut_mat(mut_mat)
-        # samples = vcf_in.samples
         samples_phased, sequences = prep_samples(vcf, table, region)
-        total_count, skipped_count = 0, 0
         for record in tqdm(vcf_in):
             pos = record.POS - 1  # gives python index
-            # if downsampling - don't assign some alternates
-            if downsample:
-                total_count += 1
-                draw = random.random()
-                if draw >= downsample:
-                    skipped_count += 1
-                    continue  # skip alternate assignment
-                else:
-                    pass
             indices_to_convert = convert_record(record)
             for i in indices_to_convert:
                 if i % 2 == 1:
@@ -132,9 +117,6 @@ def write_fasta(vcf, table, region, mut_mat, downsample, outfile):
         for sample in samples_phased:
             f.write('>' + sample + '\n')
             f.write(sequences[sample] + '\n')
-        if downsample:
-            print('{} skipped of {} SNPs.'.format(skipped_count, total_count))
-            print('{}% of SNPs reverted'.format(round(skipped_count / total_count, 3)))
 
 
 def main():
