@@ -6,3 +6,4 @@ mrt_venv/
 packrat/src/
 packrat/lib*/
 .Rproj.user
+resources/annotation_table*
