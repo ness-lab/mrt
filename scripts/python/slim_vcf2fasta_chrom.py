@@ -6,11 +6,12 @@ matrix to determine the alternate base at each variant site
 
 import argparse
 import itertools
-import ant
 
 from tqdm import tqdm
 from cyvcf2 import VCF
 import numpy as np
+
+import ANT
 
 
 def args():
@@ -40,7 +41,7 @@ def prep_samples(vcf, table, region):
     vcf_in = VCF(vcf)
     samples = vcf_in.samples
     samples_phased = []
-    p = ant.Reader(table)
+    p = ANT.Reader(table)
     chrom, coords = region.split(':')
     start, end = [int(n) for n in coords.split('-')]
     ref_seq = ''.join(record.ref for record in tqdm(p.fetch(chrom, start-1, end)))
