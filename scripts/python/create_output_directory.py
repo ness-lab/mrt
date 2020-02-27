@@ -17,5 +17,5 @@ def create_output_directory(outpath):
         print("OUTPATH EXISTS, RUNNING SLiM SIMULATIONS")
     else:
         print("CREATING OUTPUT DIRECTORY")
-        os.mkdir(outpath)
+        os.makedirs(outpath)
         print("RUNNING SLiM SIMULATIONS")
