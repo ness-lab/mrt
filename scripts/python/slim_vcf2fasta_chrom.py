@@ -1,21 +1,23 @@
 '''
-slim_vcf2fasta_chrom.py - 
+slim_vcf2fasta_chrom.py -
 use a chlamy region as the 'ref' then a mutation
 matrix to determine the alternate base at each variant site
 '''
 
 import argparse
-from tqdm import tqdm
-from cyvcf2 import VCF
-from Bio import SeqIO
-import numpy as np
+import random
 import itertools
 import ant
-import random
+
+from tqdm import tqdm
+from cyvcf2 import VCF
+# from Bio import SeqIO
+import numpy as np
+
 
 def args():
     parser = argparse.ArgumentParser(
-        description='slim vcf -> fasta w/ reference', 
+        description='slim vcf -> fasta w/ reference',
         usage='python3.5 slim_vcf2fasta_chrom.py [options]')
 
     parser.add_argument('-v', '--vcf', required=True,
@@ -36,6 +38,7 @@ def args():
     return args.vcf, args.table, args.region, \
         args.mut_mat, args.downsample, args.outfile
 
+
 def prep_samples(vcf, table, region):
     print('prepping samples...')
     vcf_in = VCF(vcf)
@@ -54,12 +57,14 @@ def prep_samples(vcf, table, region):
         sequences[sample] = ref_seq
     return samples_phased, sequences
 
+
 def convert_record(rec):
     bases = rec.gt_bases
     split_bases = [pair.split('|') for pair in bases]
     combined_bases = list(itertools.chain.from_iterable(split_bases))
     indices_to_convert = [i for i, base in enumerate(combined_bases) if base == 'T']
     return indices_to_convert
+
 
 def parse_mut_mat(mut_mat):
     print('parsing mutation matrix...')
@@ -87,8 +92,9 @@ def parse_mut_mat(mut_mat):
         denom = sum(mut_dict[base].values())
         for alt_base in mut_dict[base]:
             mut_dict[base][alt_base] = round(mut_dict[base][alt_base] / denom, 3)
-    
+
     return mut_dict
+
 
 def get_alt_allele(ref_base, mut_dict):
     possible_bases = list(mut_dict[ref_base].keys())
@@ -96,22 +102,23 @@ def get_alt_allele(ref_base, mut_dict):
     alt_allele = np.random.choice(possible_bases, 1, p=weights)[0]
     return alt_allele
 
+
 def write_fasta(vcf, table, region, mut_mat, downsample, outfile):
     with open(outfile, 'w') as f:
         vcf_in = VCF(vcf)
         mut_dict = parse_mut_mat(mut_mat)
-        samples = vcf_in.samples
+        # samples = vcf_in.samples
         samples_phased, sequences = prep_samples(vcf, table, region)
         total_count, skipped_count = 0, 0
         for record in tqdm(vcf_in):
-            pos = record.POS - 1 # gives python index
+            pos = record.POS - 1  # gives python index
             # if downsampling - don't assign some alternates
             if downsample:
                 total_count += 1
                 draw = random.random()
                 if draw >= downsample:
                     skipped_count += 1
-                    continue # skip alternate assignment
+                    continue  # skip alternate assignment
                 else:
                     pass
             indices_to_convert = convert_record(record)
@@ -129,11 +136,10 @@ def write_fasta(vcf, table, region, mut_mat, downsample, outfile):
             print('{} skipped of {} SNPs.'.format(skipped_count, total_count))
             print('{}% of SNPs reverted'.format(round(skipped_count / total_count, 3)))
 
+
 def main():
     write_fasta(*args())
 
+
 if __name__ == '__main__':
     main()
-
-        
-
