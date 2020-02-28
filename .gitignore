@@ -3,3 +3,7 @@ data/
 notebooks/
 mrt_venv/
 *.pyc
+packrat/src/
+packrat/lib*/
+.Rproj.user
+resources/annotation_table*

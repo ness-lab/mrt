@@ -6,11 +6,18 @@
 
 import subprocess
 import argparse
+import os
+
+from glob import glob
+from tqdm import tqdm
 
 from create_output_directory import create_output_directory
+import slim_vcf2fasta_chrom
 
 
 def run_slim(N, bot, outpath, slim_path):
+
+    print("Running SLiM simulations with N={0} and bot={1}. VCFs in {2}".format(N, bot, outpath))
 
     # Call SLiM from command line with N and bottleneck proportion values
     # (passed as command-line arguments)
@@ -27,13 +34,56 @@ def run_slim(N, bot, outpath, slim_path):
     print(err)  # prints error message
 
 
-def bgzip(outpath):
+def find_vcfs(outpath, ext):
 
-    # Find all VCFs in outpath
-    process_find = subprocess.Popen(['find', outpath, '-name', '*.vcf'],
+    print("Finding all {0} files in {1}".format(ext, outpath))
+
+    # Use find utility to identify all VCFs in outpath
+    process_find = subprocess.Popen(['find', outpath, '-type', 'f',
+                                    '-name', '*.' + ext],
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,
                                     universal_newlines=True)
+
+    return process_find
+
+
+def sort_vcfs(outpath):
+
+    print("Sorting all VCFs in {0}".format(outpath))
+
+    total_vcfs = 0
+    for vcf in tqdm(glob(outpath + '*.vcf')):
+
+        filename = vcf.split('/')[-1].split('.vcf')[0]
+
+        out_name = outpath + filename + '_sorted.vcf'
+
+    # Files from 'find' are piped to 'xargs', which uses 'sort' to sort by position
+        process_sort = subprocess.Popen(['vcf-sort', vcf],
+                                        # stdin=process_find.stdout,
+                                        stdout=open(out_name, 'w'),
+                                        stderr=subprocess.PIPE,
+                                        universal_newlines=True)
+
+        out, err = process_sort.communicate()
+
+        total_vcfs += 1
+
+        # print(out)
+        print(err)
+
+        os.remove(vcf)
+
+    print("Sorted a total of {0} VCFs".format(total_vcfs))
+
+
+def bgzip_vcfs(outpath):
+
+    print("bgzipping all VCF files in {0}".format(outpath))
+
+    # Use find utility to identify all VCFs in outpath
+    process_find = find_vcfs(outpath, 'vcf')
 
     # bgzip all found VCFs
     process_bgzip = subprocess.Popen(['xargs', '-n1', 'bgzip', '-f'],
@@ -47,25 +97,80 @@ def bgzip(outpath):
     print(err)
 
 
+def tabix_vcfs(outpath):
+
+    print("Tabix indexing all bgzipped VCF files in {0}".format(outpath))
+
+    # Use find utility to identify all VCFs in outpath
+    process_find = find_vcfs(outpath, 'vcf.gz')
+
+    # bgzip all found VCFs
+    process_tabix = subprocess.Popen(['xargs', '-n1', 'tabix', '-f',
+                                      '-p', 'vcf'],
+                                     stdin=process_find.stdout,
+                                     stderr=subprocess.PIPE,
+                                     universal_newlines=True)
+
+    out, err = process_tabix.communicate()
+
+    # print(out)
+    print(err)
+
+
+def vcf2fasta(table, region, mut_mat, outpath):
+
+    fasta_outpath = outpath + "fasta-files/"
+    create_output_directory(fasta_outpath)
+
+    total_vcfs = 0
+    for vcf in tqdm(glob(outpath + '*.vcf.gz')):
+
+        filename = fasta_outpath + vcf.split('/')[-1].split('.vcf.gz')[0] + ".fasta"
+
+        slim_vcf2fasta_chrom.write_fasta(vcf, table, region, mut_mat, filename)
+
+        total_vcfs += 1
+
+    print("Converted a total of {0} VCF files from {1} to FASTA. FASTA files are stored in {2}".format(total_vcfs, outpath, fasta_outpath))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("N", help="The desired population size", type=int)
-    parser.add_argument("bot", help="The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0=No bottleneck", type=float)
-    parser.add_argument("slim_path", help="Path to SLiM script.", type=str)
-    parser.add_argument("outpath", help="Path to which VCFs from SLiM should be written", type=str)
+    parser.add_argument("-n", "--pop_size", help="The desired population size", type=int, required=True)
+    parser.add_argument("-b", "--bot", help="The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0=No bottleneck", type=float, required=True)
+    parser.add_argument("-s", "--slim_path", help="Path to SLiM script.", type=str, required=True)
+    parser.add_argument('-t', '--table', required=True,
+                        type=str, help='annotation table')
+    parser.add_argument('-r', '--region', required=True,
+                        type=str, help='samtools format region (1 index)')
+    parser.add_argument('-m', '--mut_mat', required=True,
+                        type=str, help='LDhelmet mut mat file')
+    parser.add_argument("-o", "--outpath", help="Path to which VCFs from SLiM should be written", type=str, required=True)
     args = parser.parse_args()
 
     # Retrieve command-line arguments
-    N = args.N
+    N = args.pop_size
     bot = args.bot
     slim_path = args.slim_path
+    table = args.table
+    region = args.region
+    mut_mat = args.mut_mat
     outpath = str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
 
-    # Create output directory, if it doesn't exit
+    # Create output directory, if it doesn't exist
     create_output_directory(outpath)
 
     # Run simulations
     run_slim(N, bot, outpath, slim_path)
 
+    # Sort VCFs
+    sort_vcfs(outpath)
+
     # bgzip files
-    bgzip(outpath)
+    bgzip_vcfs(outpath)
+
+    # Tabix index VCFs
+    tabix_vcfs(outpath)
+
+    # Convert VCFs to fasta
+    vcf2fasta(table, region, mut_mat, outpath)
