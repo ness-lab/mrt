@@ -115,8 +115,8 @@ def write_thetaNe_values(sfs_dict, outpath):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("inpath", help="Path to directory with VCFs", type=str)
-    parser.add_argument("outpath", help="Path to which CSV with summary stats should be written", type=str)
+    parser.add_argument("-i", "--inpath", help="Path to directory with VCFs", type=str)
+    parser.add_argument("-o", "--outpath", help="Path to which CSV with summary stats should be written", type=str)
     args = parser.parse_args()
 
     # Retrieve command-line arguments
