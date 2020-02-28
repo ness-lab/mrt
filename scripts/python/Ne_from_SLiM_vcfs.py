@@ -32,7 +32,7 @@ def create_sfs_dict(inpath):
         my_vcf = VCF(vcf)
 
         #     # Split VCF filename and split to extract population size, bottleneck and generation
-        split_filename = filename.split('/')[-1].split('_')
+        split_filename = vcf.split('/')[-1].split('_')
         N_sims = int(split_filename[0].split('N')[1])
         bot = float(split_filename[1].split('bot')[1])
         gen = int(split_filename[2].split('gen')[1].split('.')[0])
