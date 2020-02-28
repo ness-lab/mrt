@@ -6,6 +6,9 @@
 
 import subprocess
 import argparse
+import os
+
+from glob import glob
 
 from create_output_directory import create_output_directory
 
@@ -42,21 +45,27 @@ def find_vcfs(outpath, ext):
 def sort_vcfs(outpath):
 
     # Use find utility to identify all VCFs in outpath
-    process_find = find_vcfs(outpath, 'vcf')
+    # process_find = find_vcfs(outpath, 'vcf')
+
+    for vcf in glob(outpath + '*.vcf'):
+
+        filename = vcf.split('/')[-1].split('.vcf')[0]
+
+        out_name = outpath + filename + '_sorted.vcf'
 
     # Files from 'find' are piped to 'xargs', which uses 'sort' to sort by position
-    process_sort = subprocess.Popen(['xargs', '-I%', '-n1',
-                                     'sort', '-n', '-k2',
-                                     '%', '-o', '%'],
-                                    stdin=process_find.stdout,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                    universal_newlines=True)
+        process_sort = subprocess.Popen(['vcf-sort', vcf],
+                                        # stdin=process_find.stdout,
+                                        stdout=open(out_name, 'w'),
+                                        stderr=subprocess.PIPE,
+                                        universal_newlines=True)
 
-    out, err = process_sort.communicate()
+        out, err = process_sort.communicate()
 
-    # print(out)
-    print(err)
+        # print(out)
+        print(err)
+
+        os.remove(vcf)
 
 
 def bgzip_vcfs(outpath):

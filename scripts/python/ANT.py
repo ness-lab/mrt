@@ -24,10 +24,8 @@ AH - 10/2017
 import gzip
 import ast
 
-try:
-    import pysam
-except ImportError:
-    pysam = None
+import pysam
+
 
 class _Record(object):
     '''A record object - stores all information at a single row in the annotation table.
@@ -100,23 +98,23 @@ class _Record(object):
 
 class Reader(object):
     '''The actual parser.
-    
-    Usage: 
+
+    Usage:
     import ant
     parser = ant.Reader([annotation table filename])
-    records = [r for r in parser] 
-    
+    records = [r for r in parser]
+
     If file is compressed + tabix-indexed, can also use .fetch():
     chr1_start = [r for r in parser.fetch('chromosome_1', start = 0, end = 50)]
-    
+
     Fetch uses tabix's half-open (?) indexing. (ie start = 0 and end = 3 corresponds to getting 1, 2, and 3).
-    
+
     Can set raw = True when initializing parser object to get raw lines instead of _Record objects.
     '''
     def __init__(self, filename = None, compressed = None, raw = False):
-        
+
         super(Reader, self).__init__
-        
+
         if not filename:
             raise Exception('Error: filename not provided.')
         elif filename:
@@ -152,7 +150,7 @@ class Reader(object):
             '''
             row = line.rstrip().split('\t')
             assert len(row) == 32
-            
+
             chromosome, position, reference_base, genic, exonic, intronic, intergenic, \
             utr5, utr3, fold0, fold4, fold2, fold3, CDS, mRNA, rRNA, tRNA, feature_names, \
             feature_types, feature_ID, cds_position, strand, frame, codon, aa, degen, \
@@ -198,17 +196,17 @@ class Reader(object):
         frame, codon, aa, degen, FPKM, rho, FAIRE, recombination, mutability, quebec_alleles) # most args I've ever written...
 
         return record
-    
+
     def fetch(self, chrom, start = None, end = None, raw = False):
         '''Returns an iterable of _Record instances. Tabix file needs to have been made using
         the vcf preset. If raw = True, returns raw lines.'''
-        
+
         if not pysam:
             raise Exception('Error: pysam not installed.')
         if not self._tabix:
             self._tabix = pysam.TabixFile(self.filename)
         self.reader = self._tabix.fetch(chrom, start, end)
-        
+
         def _line_to_rec(line):
             '''Repeated from above. I know this is very inefficient and that there's probably a better way
             to be doing this, but I don't know what that better way is for the life of me.
@@ -222,16 +220,16 @@ class Reader(object):
             FPKM, rho, FAIRE, recombination, mutability, quebec_alleles = row # unpacking list
 
             record = _Record(chromosome, position, reference_base, genic, exonic, intronic, intergenic, utr5,
-            utr3, fold0, fold4, fold2, fold3, CDS, mRNA, rRNA, tRNA, feature_names, feature_types, feature_ID, cds_position, 
+            utr3, fold0, fold4, fold2, fold3, CDS, mRNA, rRNA, tRNA, feature_names, feature_types, feature_ID, cds_position,
             strand, frame, codon, aa, degen, FPKM, rho, FAIRE, recombination, mutability, quebec_alleles)
 
             return record
-        
+
         if not raw:
             self.reader = (_line_to_rec(line) for line in self.reader)
         elif raw:
             self.reader = (line for line in self.reader)
-        
+
         return self.reader
-    
-        
+
+
