@@ -17,6 +17,8 @@ import slim_vcf2fasta_chrom
 
 def run_slim(N, bot, outpath, slim_path):
 
+    print("Running SLiM simulations with N={0} and bot={1}. VCFs in {2}".format(N, bot, outpath))
+
     # Call SLiM from command line with N and bottleneck proportion values
     # (passed as command-line arguments)
     outpath = "'" + outpath + "'"  # Required for command-line parsing and passing to SLiM
@@ -34,22 +36,24 @@ def run_slim(N, bot, outpath, slim_path):
 
 def find_vcfs(outpath, ext):
 
+    print("Finding all {0} files in {1}".format(ext, outpath))
+
     # Use find utility to identify all VCFs in outpath
     process_find = subprocess.Popen(['find', outpath, '-type', 'f',
-                                     '-name', '*.' + ext],
+                                    '-name', '*.' + ext],
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,
                                     universal_newlines=True)
 
-    return(process_find)
+    return process_find
 
 
 def sort_vcfs(outpath):
 
-    # Use find utility to identify all VCFs in outpath
-    # process_find = find_vcfs(outpath, 'vcf')
+    print("Sorting all VCFs in {0}".format(outpath))
 
-    for vcf in glob(outpath + '*.vcf'):
+    total_vcfs = 0
+    for vcf in tqdm(glob(outpath + '*.vcf')):
 
         filename = vcf.split('/')[-1].split('.vcf')[0]
 
@@ -64,13 +68,19 @@ def sort_vcfs(outpath):
 
         out, err = process_sort.communicate()
 
+        total_vcfs += 1
+
         # print(out)
         print(err)
 
         os.remove(vcf)
 
+    print("Sorted a total of {0} VCFs".format(total_vcfs))
+
 
 def bgzip_vcfs(outpath):
+
+    print("bgzipping all VCF files in {0}".format(outpath))
 
     # Use find utility to identify all VCFs in outpath
     process_find = find_vcfs(outpath, 'vcf')
@@ -89,11 +99,14 @@ def bgzip_vcfs(outpath):
 
 def tabix_vcfs(outpath):
 
+    print("Tabix indexing all bgzipped VCF files in {0}".format(outpath))
+
     # Use find utility to identify all VCFs in outpath
     process_find = find_vcfs(outpath, 'vcf.gz')
 
     # bgzip all found VCFs
-    process_tabix = subprocess.Popen(['xargs', '-n1', 'tabix', '-f'],
+    process_tabix = subprocess.Popen(['xargs', '-n1', 'tabix', '-f',
+                                      '-p', 'vcf'],
                                      stdin=process_find.stdout,
                                      stderr=subprocess.PIPE,
                                      universal_newlines=True)
@@ -109,11 +122,16 @@ def vcf2fasta(table, region, mut_mat, outpath):
     fasta_outpath = outpath + "fasta-files/"
     create_output_directory(fasta_outpath)
 
+    total_vcfs = 0
     for vcf in tqdm(glob(outpath + '*.vcf.gz')):
 
         filename = fasta_outpath + vcf.split('/')[-1].split('.vcf.gz')[0] + ".fasta"
 
         slim_vcf2fasta_chrom.write_fasta(vcf, table, region, mut_mat, filename)
+
+        total_vcfs += 1
+
+    print("Converted a total of {0} VCF files from {1} to FASTA. FASTA files are stored in {2}".format(total_vcfs, outpath, fasta_outpath))
 
 
 if __name__ == "__main__":
@@ -139,20 +157,20 @@ if __name__ == "__main__":
     mut_mat = args.mut_mat
     outpath = str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
 
-    # Create output directory, if it doesn't exit
+    # Create output directory, if it doesn't exist
     create_output_directory(outpath)
 
     # Run simulations
-    # run_slim(N, bot, outpath, slim_path)
+    run_slim(N, bot, outpath, slim_path)
 
     # Sort VCFs
-    # sort_vcfs(outpath)
+    sort_vcfs(outpath)
 
     # bgzip files
-    # bgzip_vcfs(outpath)
+    bgzip_vcfs(outpath)
 
     # Tabix index VCFs
-    # tabix_vcfs(outpath)
+    tabix_vcfs(outpath)
 
     # Convert VCFs to fasta
     vcf2fasta(table, region, mut_mat, outpath)

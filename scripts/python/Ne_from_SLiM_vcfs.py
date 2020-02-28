@@ -17,17 +17,19 @@ from create_output_directory import create_output_directory
 
 def create_sfs_dict(inpath):
 
+    print("Creating dictionary of Site Frequency Sprectra from VCFs in {0}".format(inpath))
+
     # Initialize sfs dict
     sfs_dict = {}
 
     # Get files from inpath
     files = glob(inpath + "**/*.vcf.gz", recursive=True)
 
-    for filename in tqdm(files):
-        # print(filename)
+    total_vcfs = 0
+    for vcf in tqdm(files):
 
         # Load in VCF file
-        my_vcf = VCF(filename)
+        my_vcf = VCF(vcf)
 
         #     # Split VCF filename and split to extract population size, bottleneck and generation
         split_filename = filename.split('/')[-1].split('_')
@@ -62,14 +64,20 @@ def create_sfs_dict(inpath):
         else:
             sfs_dict[l1] = {gen: sfs}
 
+        total_vcfs += 1
+
+    print("Processed {0} VCFs".format(total_vcfs))
+
     return sfs_dict
 
 
 def write_thetaNe_values(sfs_dict, outpath):
 
+    print("Writing diversity (i.e., theta) summary statistics to CSV")
+
     # Open csv to write resutls
-    filtepath = outpath + 'theta_NeValues.csv'
-    with open(filtepath, 'w+') as f:
+    filepath = outpath + 'theta_NeValues.csv'
+    with open(filepath, 'w+') as f:
 
         # Instantiate CSV writer
         writer = csv.writer(f)
@@ -81,7 +89,7 @@ def write_thetaNe_values(sfs_dict, outpath):
         mu = float(1e-8)
 
         # Interate through sfs dictionary and write to csv
-        for key in sfs_dict.keys():
+        for key in tqdm(sfs_dict.keys()):
 
             # Get dict values, which are encoded as <pop size>-<bottleneck>
             size_bot = sfs_dict[key]
@@ -101,6 +109,8 @@ def write_thetaNe_values(sfs_dict, outpath):
                 # Write generation's summary stats as row
                 row = [pop_size, bottleneck, gen, pi, wattersons, Ne_pi, Ne_w, '\n']
                 writer.writerow(row)
+
+    print("Done writing summary stats. Output written to {0}".format(filepath))
 
 
 if __name__ == "__main__":
