@@ -9,8 +9,10 @@ import argparse
 import os
 
 from glob import glob
+from tqdm import tqdm
 
 from create_output_directory import create_output_directory
+import slim_vcf2fasta_chrom
 
 
 def run_slim(N, bot, outpath, slim_path):
@@ -102,31 +104,55 @@ def tabix_vcfs(outpath):
     print(err)
 
 
+def vcf2fasta(table, region, mut_mat, outpath):
+
+    fasta_outpath = outpath + "fasta-files/"
+    create_output_directory(fasta_outpath)
+
+    for vcf in tqdm(glob(outpath + '*.vcf.gz')):
+
+        filename = fasta_outpath + vcf.split('/')[-1].split('.vcf.gz')[0] + ".fasta"
+
+        slim_vcf2fasta_chrom.write_fasta(vcf, table, region, mut_mat, filename)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("N", help="The desired population size", type=int)
-    parser.add_argument("bot", help="The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0=No bottleneck", type=float)
-    parser.add_argument("slim_path", help="Path to SLiM script.", type=str)
-    parser.add_argument("outpath", help="Path to which VCFs from SLiM should be written", type=str)
+    parser.add_argument("-n", "--pop_size", help="The desired population size", type=int, required=True)
+    parser.add_argument("-b", "--bot", help="The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0=No bottleneck", type=float, required=True)
+    parser.add_argument("-s", "--slim_path", help="Path to SLiM script.", type=str, required=True)
+    parser.add_argument('-t', '--table', required=True,
+                        type=str, help='annotation table')
+    parser.add_argument('-r', '--region', required=True,
+                        type=str, help='samtools format region (1 index)')
+    parser.add_argument('-m', '--mut_mat', required=True,
+                        type=str, help='LDhelmet mut mat file')
+    parser.add_argument("-o", "--outpath", help="Path to which VCFs from SLiM should be written", type=str, required=True)
     args = parser.parse_args()
 
     # Retrieve command-line arguments
-    N = args.N
+    N = args.pop_size
     bot = args.bot
     slim_path = args.slim_path
+    table = args.table
+    region = args.region
+    mut_mat = args.mut_mat
     outpath = str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
 
     # Create output directory, if it doesn't exit
     create_output_directory(outpath)
 
     # Run simulations
-    run_slim(N, bot, outpath, slim_path)
+    # run_slim(N, bot, outpath, slim_path)
 
     # Sort VCFs
-    sort_vcfs(outpath)
+    # sort_vcfs(outpath)
 
     # bgzip files
-    bgzip_vcfs(outpath)
+    # bgzip_vcfs(outpath)
 
     # Tabix index VCFs
-    tabix_vcfs(outpath)
+    # tabix_vcfs(outpath)
+
+    # Convert VCFs to fasta
+    vcf2fasta(table, region, mut_mat, outpath)
