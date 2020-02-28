@@ -45,7 +45,7 @@ def prep_samples(vcf, table, region):
     chrom, coords = region.split(':')
     start, end = [int(n) for n in coords.split('-')]
     ref_seq = ''.join(record.ref for record in tqdm(p.fetch(chrom, start-1, end)))
-    assert len(ref_seq) == int(1e5)
+    assert len(ref_seq) == int(1e6)
     for sample in samples:
         samples_phased.extend([sample + 'A', sample + 'B'])
     # import reference sequence
