@@ -12,4 +12,11 @@ module load gnu-parallel/20190222
 module load samtools/1.9
 module load vcftools/0.1.16
 
-parallel python ../python/SLiM_sims.py -n {1} -b {2} -s {3} -t {4} -r {5} -m {6} -o {7} ::: 100 500 1000 ::: 0.1 0.5 1.0 ::: ../slim/Bottleneck.slim ::: ../../resources/annotation_table.txt.gz ::: chromosome_1:1-1000000 ::: ../../resources/mut_mat.txt ::: ../../data/bottleneck/
+parallel python ../python/SLiM_sims.py -n {1} -b {2} -s {3} -t {4} -r {5} -m {6} -o {7} \
+::: 100 500 1000 \
+::: 0.1 0.5 1.0 \
+::: ../slim/Bottleneck.slim \
+::: ../../resources/annotation_table.txt.gz \
+::: chromosome_1:1-1000000 \
+::: ../../resources/mut_mat.txt \
+::: ../../data/bottleneck/
