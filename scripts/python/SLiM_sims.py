@@ -15,14 +15,20 @@ from create_output_directory import create_output_directory
 import slim_vcf2fasta_chrom
 
 
-def run_slim(N, bot, outpath, slim_path):
+def run_slim(N, bot, region, outpath, slim_path):
 
     print("Running SLiM simulations with N={0} and bot={1}. VCFs in {2}".format(N, bot, outpath))
+
+    # Calculate length of sequence from 'region' provided at command-line
+    coords = region.split(':')[1]
+    start, end = [int(n) for n in coords.split('-')]
+
+    seq_length = (end - start) + 1
 
     # Call SLiM from command line with N and bottleneck proportion values
     # (passed as command-line arguments)
     outpath = "'" + outpath + "'"  # Required for command-line parsing and passing to SLiM
-    process = subprocess.Popen(["slim", "-s", "42", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "-d", "outpath=" + str(outpath), slim_path],
+    process = subprocess.Popen(["slim", "-s", "42", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "-d", "seq_length=" + str(seq_length), "-d", "outpath=" + str(outpath), slim_path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                universal_newlines=True)
@@ -161,7 +167,7 @@ if __name__ == "__main__":
     create_output_directory(outpath)
 
     # Run simulations
-    run_slim(N, bot, outpath, slim_path)
+    run_slim(N, bot, region, outpath, slim_path)
 
     # Sort VCFs
     sort_vcfs(outpath)
