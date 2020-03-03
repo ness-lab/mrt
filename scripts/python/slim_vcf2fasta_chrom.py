@@ -44,8 +44,9 @@ def prep_samples(vcf, table, region):
     p = ANT.Reader(table)
     chrom, coords = region.split(':')
     start, end = [int(n) for n in coords.split('-')]
+    seq_length = (end - start) + 1
     ref_seq = ''.join(record.ref for record in tqdm(p.fetch(chrom, start-1, end)))
-    assert len(ref_seq) == int(1e6)
+    assert len(ref_seq) == int(seq_length)
     for sample in samples:
         samples_phased.extend([sample + 'A', sample + 'B'])
     # import reference sequence
@@ -101,6 +102,11 @@ def get_alt_allele(ref_base, mut_dict):
 
 
 def write_fasta(vcf, table, region, mut_mat, outfile):
+
+    # Get start and end of sequence
+    coords = region.split(':')[1]
+    start, end = [int(n) for n in coords.split('-')]
+
     with open(outfile, 'w') as f:
         vcf_in = VCF(vcf)
         mut_dict = parse_mut_mat(mut_mat)
@@ -114,7 +120,7 @@ def write_fasta(vcf, table, region, mut_mat, outfile):
                 else:
                     sample = 'i' + str(int(i / 2)) + 'A'
                 alt = get_alt_allele(record.REF, mut_dict)
-                sequences[sample] = sequences[sample][:pos] + alt + sequences[sample][record.POS:int(1e5)]
+                sequences[sample] = sequences[sample][:pos] + alt + sequences[sample][record.POS:int(end + 1)]
         for sample in samples_phased:
             f.write('>' + sample + '\n')
             f.write(sequences[sample] + '\n')
