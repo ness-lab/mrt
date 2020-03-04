@@ -8,4 +8,4 @@
 
 module load python/3.6.2
 
-python ../python/Ne_from_SLiM_vcfs.py -i ../../data/bottleneck/ -o ../../data/calcNe/
+python ../python/Ne_from_SLiM_vcfs.py -i ../../data/bottleneck/ -o ../../data/bottleneck/calcNe/
