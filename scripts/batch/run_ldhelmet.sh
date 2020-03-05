@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH -N 1      # nodes requested
 #SBATCH -n 1      # tasks requested
-#SBATCH -c 30      # cores requested
+#SBATCH -c 50      # cores requested
 #SBATCH --mem=100000  # memory in Mb
 #SBATCH -o ldhelmet_outfile  # send stdout to outfile
 #SBATCH -e ldhelmet_errfile  # send stderr to errfile
