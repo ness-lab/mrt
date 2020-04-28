@@ -144,6 +144,8 @@ def get_alt_allele(ref_base, mut_dict):
     """
     possible_bases = list(mut_dict[ref_base].keys())
     weights = [mut_dict[ref_base][alt_base] for alt_base in possible_bases]
+    weights = np.array(weights)
+    weights /= weights.sum()  # Normalize to sum to 1
     alt_allele = np.random.choice(possible_bases, 1, p=weights)[0]
     return alt_allele
 

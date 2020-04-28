@@ -30,9 +30,12 @@ def args():
                         type=str, help='LDhelmet mut mat file')
     parser.add_argument("-o", "--outpath", help="Path to which VCFs from SLiM should be written", type=str, required=True)
     args = parser.parse_args()
+
+    N = args.pop_size
+    bot = args.bot
     outpath = str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
 
-    return args.pop_size, args.bot, args.slim_path, args.fasta, args.region, args.mut_mat, outpath
+    return N, bot, args.slim_path, args.fasta, args.region, args.mut_mat, outpath
 
 
 def run_slim(N, bot, region, outpath, slim_path):
