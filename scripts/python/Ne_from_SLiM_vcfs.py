@@ -15,6 +15,17 @@ import SFS as SFS
 from create_output_directory import create_output_directory
 
 
+def args():
+
+    parser = argparse.ArgumentParser(description="Create CSV with theta and Ne for every generation from SLiM simulations",
+                                     usage="python3.7 Ne_from_SLiM_vcfs.py [options]")
+    parser.add_argument("-i", "--inpath", help="Path to directory with VCFs", type=str)
+    parser.add_argument("-o", "--outpath", help="Path to which CSV with summary stats should be written", type=str)
+    args = parser.parse_args()
+
+    return args.inpath, args.outpath
+
+
 def create_sfs_dict(inpath):
 
     print("Creating dictionary of Site Frequency Sprectra from VCFs in {0}".format(inpath))
@@ -114,14 +125,9 @@ def write_thetaNe_values(sfs_dict, outpath):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--inpath", help="Path to directory with VCFs", type=str)
-    parser.add_argument("-o", "--outpath", help="Path to which CSV with summary stats should be written", type=str)
-    args = parser.parse_args()
 
     # Retrieve command-line arguments
-    inpath = args.inpath
-    outpath = args.outpath
+    inpath, outpath = args()
 
     # Create output directory, if it doesn't exit
     create_output_directory(outpath)
