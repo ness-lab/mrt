@@ -1,5 +1,6 @@
 appnope==0.1.0
 backcall==0.1.0
+biopython==1.76
 Cython==0.29.15
 cyvcf2==0.11.5
 decorator==4.4.1
