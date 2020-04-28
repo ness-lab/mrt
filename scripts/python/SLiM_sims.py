@@ -18,7 +18,7 @@ import slim_vcf2fasta_chrom
 def args():
 
     parser = argparse.ArgumentParser(description="Run simulations in SLiM and convert VCFs to FASTA using Drosophila reference",
-                                     usage="python3 SLiM_sims.py [options]")
+                                     usage="python3.7 SLiM_sims.py [options]")
     parser.add_argument("-n", "--pop_size", help="The desired population size", type=int, required=True)
     parser.add_argument("-b", "--bot", help="The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0=No bottleneck", type=float, required=True)
     parser.add_argument("-s", "--slim_path", help="Path to SLiM script.", type=str, required=True)
@@ -30,7 +30,7 @@ def args():
                         type=str, help='LDhelmet mut mat file')
     parser.add_argument("-o", "--outpath", help="Path to which VCFs from SLiM should be written", type=str, required=True)
     args = parser.parse_args()
-    outpath =  str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
+    outpath = str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
 
     return args.pop_size, args.bot, args.slim_path, args.table, args.region, args.mut_mat, outpath
 
