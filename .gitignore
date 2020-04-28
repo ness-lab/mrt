@@ -10,3 +10,5 @@ resources/annotation_table*
 *outfile
 *errfile
 dmel-reference-r6.32.fasta
+.Rhistory
+__pychache__
