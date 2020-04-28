@@ -21,6 +21,8 @@ def args():
                                      usage="python3.7 SLiM_sims.py [options]")
     parser.add_argument("-n", "--pop_size", help="The desired population size", type=int, required=True)
     parser.add_argument("-b", "--bot", help="The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0=No bottleneck", type=float, required=True)
+    parser.add_argument("-u", "--mutation_rate", help="Per base-pair mutation rate in scientific notation (e.g., 1e-8). (Default: 2.8e-9)", type=float, default=2.8e-9)
+    parser.add_argument("-rec", "--recombination_rate", help="Per base-pair recombination rate rate in scientific notation (e.g., 1e-8). (Default: 2.14e-6)", type=float, default=2.14e-6)
     parser.add_argument("-s", "--slim_path", help="Path to SLiM script.", type=str, required=True)
     parser.add_argument('-f', '--fasta', required=True,
                         type=str, help='Reference sequence in FASTA format')
@@ -35,10 +37,10 @@ def args():
     bot = args.bot
     outpath = str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
 
-    return N, bot, args.slim_path, args.fasta, args.region, args.mut_mat, outpath
+    return N, bot, args.mutation_rate, args.recombination_rate, args.slim_path, args.fasta, args.region, args.mut_mat, outpath
 
 
-def run_slim(N, bot, region, outpath, slim_path):
+def run_slim(N, bot, mu, rec, region, outpath, slim_path):
 
     print("Running SLiM simulations with N={0} and bot={1}. VCFs in {2}".format(N, bot, outpath))
 
@@ -48,10 +50,11 @@ def run_slim(N, bot, region, outpath, slim_path):
 
     seq_length = (end - start) + 1
 
+    print(mu, rec, seq_length)
     # Call SLiM from command line with N and bottleneck proportion values
     # (passed as command-line arguments)
     outpath = "'" + outpath + "'"  # Required for command-line parsing and passing to SLiM
-    process = subprocess.Popen(["slim", "-s", "42", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "-d", "seq_length=" + str(seq_length), "-d", "outpath=" + str(outpath), slim_path],
+    process = subprocess.Popen(["slim", "-s", "42", "-d", "N=" + str(N), "-d", "bot=" + str(bot), "-d", "mu=" + str(mu), "-d", "rec=" + str(rec), "-d", "seq_length=" + str(seq_length), "-d", "outpath=" + str(outpath), slim_path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                universal_newlines=True)
@@ -166,13 +169,13 @@ def vcf2fasta(fasta, region, mut_mat, outpath):
 if __name__ == "__main__":
 
     # Retrieve command-line arguments
-    N, bot, slim_path, fasta, region, mut_mat, outpath = args()
+    N, bot, mu, rec, slim_path, fasta, region, mut_mat, outpath = args()
 
     # Create output directory, if it doesn't exist
     create_output_directory(outpath)
 
     # Run simulations
-    run_slim(N, bot, region, outpath, slim_path)
+    run_slim(N, bot, mu, rec, region, outpath, slim_path)
 
     # Sort VCFs
     sort_vcfs(outpath)
