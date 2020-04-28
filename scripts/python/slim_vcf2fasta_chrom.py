@@ -171,7 +171,7 @@ def write_fasta(vcf, fasta, region, mut_mat, outfile):
     with open(outfile, 'w') as f:
         vcf_in = VCF(vcf)
         mut_dict = parse_mut_mat(mut_mat)
-        samples_phased, sequences = prep_samples(vcf, table, region)
+        samples_phased, sequences = prep_samples(vcf, fasta, region)
         for record in tqdm(vcf_in):
             pos = record.POS - 1  # gives python index
             indices_to_convert = convert_record(record)

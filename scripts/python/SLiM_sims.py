@@ -22,8 +22,8 @@ def args():
     parser.add_argument("-n", "--pop_size", help="The desired population size", type=int, required=True)
     parser.add_argument("-b", "--bot", help="The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0=No bottleneck", type=float, required=True)
     parser.add_argument("-s", "--slim_path", help="Path to SLiM script.", type=str, required=True)
-    parser.add_argument('-t', '--table', required=True,
-                        type=str, help='annotation table')
+    parser.add_argument('-f', '--fasta', required=True,
+                        type=str, help='Reference sequence in FASTA format')
     parser.add_argument('-r', '--region', required=True,
                         type=str, help='samtools format region (1 index)')
     parser.add_argument('-m', '--mut_mat', required=True,
@@ -32,7 +32,8 @@ def args():
     args = parser.parse_args()
     outpath = str(args.outpath) + "N{0}_bot{1}/".format(N, bot)
 
-    return args.pop_size, args.bot, args.slim_path, args.table, args.region, args.mut_mat, outpath
+    return args.pop_size, args.bot, args.slim_path, args.fasta, args.region, args.mut_mat, outpath
+
 
 def run_slim(N, bot, region, outpath, slim_path):
 
@@ -142,7 +143,7 @@ def tabix_vcfs(outpath):
     print(err)
 
 
-def vcf2fasta(table, region, mut_mat, outpath):
+def vcf2fasta(fasta, region, mut_mat, outpath):
 
     fasta_outpath = outpath + "fasta-files/"
     create_output_directory(fasta_outpath)
@@ -152,7 +153,7 @@ def vcf2fasta(table, region, mut_mat, outpath):
 
         filename = fasta_outpath + vcf.split('/')[-1].split('.vcf.gz')[0] + ".fasta"
 
-        slim_vcf2fasta_chrom.write_fasta(vcf, table, region, mut_mat, filename)
+        slim_vcf2fasta_chrom.write_fasta(vcf, fasta, region, mut_mat, filename)
 
         total_vcfs += 1
 
@@ -162,7 +163,7 @@ def vcf2fasta(table, region, mut_mat, outpath):
 if __name__ == "__main__":
 
     # Retrieve command-line arguments
-    N, bot, slim_path, table, region, mut_mat, outpath = args()
+    N, bot, slim_path, fasta, region, mut_mat, outpath = args()
 
     # Create output directory, if it doesn't exist
     create_output_directory(outpath)
@@ -180,4 +181,4 @@ if __name__ == "__main__":
     tabix_vcfs(outpath)
 
     # Convert VCFs to fasta
-    vcf2fasta(table, region, mut_mat, outpath)
+    vcf2fasta(fasta, region, mut_mat, outpath)
