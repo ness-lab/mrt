@@ -13,7 +13,7 @@ def create_output_directory(outpath):
         None: Creates directory, if necessary
     """
 
-    print("Creating directory: {0}".format(outpath))
+    print('Creating directory: {0}'.format(outpath))
     if os.path.isdir(outpath):
         pass
     else:
