@@ -26,7 +26,7 @@ def args():
     parser.add_argument('-n', '--pop_size', help='The desired population size', type=int, required=True)
     parser.add_argument('-b', '--bot', help='The desired strength of the population bottleneck. Expressed as the proportion of the population sampled during the bottleneck. 1.0=No bottleneck', type=float, required=True)
     parser.add_argument('-u', '--mutation_rate', help='Per base-pair mutation rate in scientific notation (e.g., 1e-8). (Default: 2.8e-9)', type=float, default=2.8e-9)
-    parser.add_argument('-rec', '--recombination_rate', help='Per base-pair recombination rate rate in scientific notation (e.g., 1e-8). (Default: 2.14e-6)', type=float, default=2.14e-6)
+    parser.add_argument('-rec', '--recombination_rate', help='Per base-pair recombination rate rate in scientific notation (e.g., 1e-8). (Default: 2.14e-8)', type=float, default=2.14e-8)
     parser.add_argument('-s', '--slim_path', help='Path to SLiM script.', type=str, required=True)
     parser.add_argument('-f', '--fasta', required=True,
                         type=str, help='Reference sequence in FASTA format')
@@ -51,7 +51,7 @@ def run_slim(N, bot, mu, rec, region, outpath, slim_path):
         N (int): Population size
         bot (float): Proportion of population to sample for bottleneck
         mu (float): Per-base-pair mutation rate
-        rec (float): Per-base-pair recombination rate
+        rec (float): Per-base-pair recombination rate in represented as crossovers/bp (i.e., CM/bp x 10e-2)
         region (str): Genomic region in samtools format
         outpath (str): Path to which VCFs should be written
         slim_path (str): Path to SLiM script to execute at command-line
@@ -196,7 +196,7 @@ def tabix_vcfs(outpath):
 
 
 def vcf2fasta(fasta, region, mut_mat, outpath):
-    """Converts VCFs to faste
+    """Converts VCFs to FASTA
 
     Args:
         fasta (str): Path to reference genome in FASTA format
