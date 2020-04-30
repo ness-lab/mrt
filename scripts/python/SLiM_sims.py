@@ -234,14 +234,14 @@ if __name__ == '__main__':
     # Run simulations
     run_slim(N, bot, mu, rec, region, outpath, slim_path)
 
-    # # Sort VCFs
-    # sort_vcfs(outpath)
+    # Sort VCFs
+    sort_vcfs(outpath)
 
-    # # bgzip files
-    # bgzip_vcfs(outpath)
+    # bgzip files
+    bgzip_vcfs(outpath)
 
-    # # Tabix index VCFs
-    # tabix_vcfs(outpath)
+    # Tabix index VCFs
+    tabix_vcfs(outpath)
 
-    # # Convert VCFs to fasta
-    # vcf2fasta(fasta, region, mut_mat, outpath)
+    # Convert VCFs to fasta
+    vcf2fasta(fasta, region, mut_mat, outpath)

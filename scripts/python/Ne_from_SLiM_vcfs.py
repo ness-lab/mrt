@@ -23,14 +23,15 @@ def args():
     """
     parser = argparse.ArgumentParser(description='Create CSV with theta and Ne for every generation from SLiM simulations',
                                      usage='python3.7 Ne_from_SLiM_vcfs.py [options]')
-    parser.add_argument('-i', '--inpath', help='Path to directory with VCFs', type=str)
-    parser.add_argument('-o', '--outpath', help='Path to which CSV with summary stats should be written', type=str)
+    parser.add_argument('-i', '--inpath', help='Path to directory with VCFs', type=str, required=True)
+    parser.add_argument('-o', '--outpath', help='Path to which CSV with summary stats should be written', type=str, required=True)
+    parser.add_argument('-l', '--seq_length', help='Length of sequence in bp in scientific notation (e.g., 1e8). (Default: 1e6)', type=int, default=1e6)
     args = parser.parse_args()
 
-    return args.inpath, args.outpath
+    return args.inpath, args.outpath, args.seq_length
 
 
-def create_sfs_dict(inpath):
+def create_sfs_dict(inpath, seq_length):
     """Creates Site-frequency spectrum from VCF
 
     Args:
@@ -70,8 +71,7 @@ def create_sfs_dict(inpath):
             sfs_list[AC] += 1
 
         # Add invariant sites to sfs list
-        ch_length = 1e8
-        sfs_list[0] = int(ch_length - sum(sfs_list))
+        sfs_list[0] = int(seq_length - sum(sfs_list))
         # print(sfs_list)
 
         # Use sfs list to instantiate SFS class (Rob's code)
@@ -147,13 +147,13 @@ def write_thetaNe_values(sfs_dict, outpath):
 if __name__ == '__main__':
 
     # Retrieve command-line arguments
-    inpath, outpath = args()
+    inpath, outpath, seq_length= args()
 
     # Create output directory, if it doesn't exit
     create_output_directory(outpath)
 
     # Create SFS dict
-    sfs_dict = create_sfs_dict(inpath=inpath)
+    sfs_dict = create_sfs_dict(inpath=inpath, seq_length=seq_length)
 
     # Create summary CSV
     write_thetaNe_values(sfs_dict=sfs_dict, outpath=outpath)
