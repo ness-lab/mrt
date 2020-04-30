@@ -32,14 +32,14 @@ s1 late() {
 
 		// If population has at least 50 individuals
 		if(p1.individualCount >= 50){
-			print(p1.individualCount);
+//			print(p1.individualCount);
 			//p1.genomes.outputVCF();
 //			print("Writing " + "./slim_" + N + "_" + sim.generation + ".vcf");
       	p1.outputVCFSample(50, replace = F, outputMultiallelics = F, filePath=outpath + "N" + N + "_" + "bot" + bot + "_" + "gen" + sim.generation + ".vcf");
 
       }
       if(p1.individualCount < 50){
-      	print(p1.individualCount);
+//      	print(p1.individualCount);
 			//p1.genomes.outputVCF();
 //			print("Writing " + "./slim_" + N + "_" + sim.generation + ".vcf");
       	p1.outputVCFSample(p1.individualCount, replace = F, outputMultiallelics = F, filePath=outpath + "N" + N + "_" + "bot" + bot + "_" + "gen" + sim.generation + ".vcf");

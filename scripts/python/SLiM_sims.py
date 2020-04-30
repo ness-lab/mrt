@@ -59,19 +59,20 @@ def run_slim(N, bot, mu, rec, region, outpath, slim_path):
     Returns:
         None: VCFs for simulations written by SLiM script executed through command-line
     """
-    print('Running SLiM simulations with N={0} and bot={1}. VCFs in {2}'.format(N, bot, outpath))
-
     # Calculate length of sequence from 'region' provided at command-line
     coords = region.split(':')[1]
     start, end = [int(n) for n in coords.split('-')]
 
     seq_length = (end - start) + 1
 
-    print(mu, rec, seq_length)
+    print('Running SLiM simulations with N={0}, bot={1}, mu={2}, and rec={3}. Sequence length is {4}. VCFs in {5}'.format(N, bot, mu, rec, seq_length, outpath))
+
+    seed = int(N) + int(bot * 100)
+
     # Call SLiM from command line with N and bottleneck proportion values
     # (passed as command-line arguments)
     outpath = "'" + outpath + "'"  # Required for command-line parsing and passing to SLiM
-    process = subprocess.Popen(['slim', '-s', '42', '-d', 'N=' + str(N), '-d', 'bot=' + str(bot), '-d', 'mu=' + str(mu), '-d', 'rec=' + str(rec), '-d', 'seq_length=' + str(seq_length), '-d', 'outpath=' + str(outpath), slim_path],
+    process = subprocess.Popen(['slim', '-s', str(seed), '-d', 'N=' + str(N), '-d', 'bot=' + str(bot), '-d', 'mu=' + str(mu), '-d', 'rec=' + str(rec), '-d', 'seq_length=' + str(seq_length), '-d', 'outpath=' + str(outpath), slim_path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                universal_newlines=True)
@@ -79,8 +80,8 @@ def run_slim(N, bot, mu, rec, region, outpath, slim_path):
 
     # out is output of slim
     # err is error message from slim
-    # print(out)  # calls function to parse the output
-    print(err)  # prints error message
+    print(out)  # calls function to parse the output
+    # print(err)  # prints error message
 
 
 def find_vcfs(outpath, ext):
@@ -233,14 +234,14 @@ if __name__ == '__main__':
     # Run simulations
     run_slim(N, bot, mu, rec, region, outpath, slim_path)
 
-    # Sort VCFs
-    sort_vcfs(outpath)
+    # # Sort VCFs
+    # sort_vcfs(outpath)
 
-    # bgzip files
-    bgzip_vcfs(outpath)
+    # # bgzip files
+    # bgzip_vcfs(outpath)
 
-    # Tabix index VCFs
-    tabix_vcfs(outpath)
+    # # Tabix index VCFs
+    # tabix_vcfs(outpath)
 
-    # Convert VCFs to fasta
-    vcf2fasta(fasta, region, mut_mat, outpath)
+    # # Convert VCFs to fasta
+    # vcf2fasta(fasta, region, mut_mat, outpath)
