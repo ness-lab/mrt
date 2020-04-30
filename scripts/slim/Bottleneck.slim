@@ -1,7 +1,7 @@
 // set up a simple neutral simulation
 initialize() {
 
-	initializeMutationRate(1e-8);
+	initializeMutationRate(mu);
 	// m1 mutation type: neutral
 	initializeMutationType("m1", 0.5, "f", 0.0);
 	// g1 genomic element type: uses m1 for all mutations
@@ -9,7 +9,7 @@ initialize() {
 	// uniform chromosome of length 100 Mb with uniform recombination
 	// chosen as the size of the Chlamydamonas genome
 	initializeGenomicElement(g1, 0, seq_length);
-	initializeRecombinationRate(1e-8);
+	initializeRecombinationRate(rec);
 
 	// New population size following the bottleneck
 	// "N" and "bottleneck" defined in SLiM_sims.py

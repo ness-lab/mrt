@@ -15,15 +15,37 @@ import SFS as SFS
 from create_output_directory import create_output_directory
 
 
-def create_sfs_dict(inpath):
+def args():
+    """Parse and return command-line arguments
 
-    print("Creating dictionary of Site Frequency Sprectra from VCFs in {0}".format(inpath))
+    Returns:
+        Command-line arguments
+    """
+    parser = argparse.ArgumentParser(description='Create CSV with theta and Ne for every generation from SLiM simulations',
+                                     usage='python3.7 Ne_from_SLiM_vcfs.py [options]')
+    parser.add_argument('-i', '--inpath', help='Path to directory with VCFs', type=str)
+    parser.add_argument('-o', '--outpath', help='Path to which CSV with summary stats should be written', type=str)
+    args = parser.parse_args()
+
+    return args.inpath, args.outpath
+
+
+def create_sfs_dict(inpath):
+    """Creates Site-frequency spectrum from VCF
+
+    Args:
+        inpath (str): Path with multiple bgzipped VCFs
+
+    Returns:
+        sfs_dict (dict of str: list): Dictionary with simulation as keys and site-frequency spectrum as list value
+    """
+    print('Creating dictionary of Site Frequency Sprectra from VCFs in {0}'.format(inpath))
 
     # Initialize sfs dict
     sfs_dict = {}
 
     # Get files from inpath
-    files = glob(inpath + "**/*.vcf.gz", recursive=True)
+    files = glob(inpath + '**/*.vcf.gz', recursive=True)
 
     total_vcfs = 0
     for vcf in tqdm(files):
@@ -66,14 +88,23 @@ def create_sfs_dict(inpath):
 
         total_vcfs += 1
 
-    print("Processed {0} VCFs".format(total_vcfs))
+    print('Processed {0} VCFs'.format(total_vcfs))
 
     return sfs_dict
 
 
 def write_thetaNe_values(sfs_dict, outpath):
+    """Creates Site-frequency spectrum from VCF
 
-    print("Writing diversity (i.e., theta) summary statistics to CSV")
+    Args:
+        sfs_dict (dict of str: list): Dictionary with simulation as keys and site-frequency spectrum as list value
+        outpath (str): Path to which CSV should be written
+
+    Returns:
+        None: Writes CSV with simulation results to disk
+    """
+
+    print('Writing diversity (i.e., theta) summary statistics to CSV')
 
     # Open csv to write resutls
     filepath = outpath + 'theta_NeValues.csv'
@@ -110,18 +141,13 @@ def write_thetaNe_values(sfs_dict, outpath):
                 row = [pop_size, bottleneck, gen, pi, wattersons, Ne_pi, Ne_w, '\n']
                 writer.writerow(row)
 
-    print("Done writing summary stats. Output written to {0}".format(filepath))
+    print('Done writing summary stats. Output written to {0}'.format(filepath))
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--inpath", help="Path to directory with VCFs", type=str)
-    parser.add_argument("-o", "--outpath", help="Path to which CSV with summary stats should be written", type=str)
-    args = parser.parse_args()
+if __name__ == '__main__':
 
     # Retrieve command-line arguments
-    inpath = args.inpath
-    outpath = args.outpath
+    inpath, outpath = args()
 
     # Create output directory, if it doesn't exit
     create_output_directory(outpath)

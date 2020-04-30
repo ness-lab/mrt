@@ -7,6 +7,7 @@ matrix to determine the alternate base at each variant site
 import argparse
 import itertools
 
+from typing import Tuple
 from tqdm import tqdm
 from cyvcf2 import VCF
 from Bio import SeqIO
@@ -34,12 +35,12 @@ def args():
     return args.vcf, args.fasta, args.region, args.mut_mat, args.outfile
 
 
-def prep_samples(vcf: str, fasta: str, region: str): -> list, dict
+def prep_samples(vcf: str, fasta: str, region: str) -> Tuple[list, dict]:
     """Prepare samples and reference sequences to populate with alt alleles.
 
     Args:
         vcf: a bgzipped and tabixed SLiM VCF output file.
-        fasta: a FASTA containing the reference genome (or at minimum, 
+        fasta: a FASTA containing the reference genome (or at minimum,
             the reference chromosome(s) of interest)
         region: samtools formatted region to extract from reference
             FASTA.
@@ -143,6 +144,8 @@ def get_alt_allele(ref_base, mut_dict):
     """
     possible_bases = list(mut_dict[ref_base].keys())
     weights = [mut_dict[ref_base][alt_base] for alt_base in possible_bases]
+    weights = np.array(weights)
+    weights /= weights.sum()  # Normalize to sum to 1
     alt_allele = np.random.choice(possible_bases, 1, p=weights)[0]
     return alt_allele
 
@@ -161,7 +164,7 @@ def write_fasta(vcf, fasta, region, mut_mat, outfile):
 
     Returns:
         None
-        Writes results to outfile. 
+        Writes results to outfile.
     """
     # Get start and end of sequence
     coords = region.split(':')[1]
@@ -170,7 +173,7 @@ def write_fasta(vcf, fasta, region, mut_mat, outfile):
     with open(outfile, 'w') as f:
         vcf_in = VCF(vcf)
         mut_dict = parse_mut_mat(mut_mat)
-        samples_phased, sequences = prep_samples(vcf, table, region)
+        samples_phased, sequences = prep_samples(vcf, fasta, region)
         for record in tqdm(vcf_in):
             pos = record.POS - 1  # gives python index
             indices_to_convert = convert_record(record)
